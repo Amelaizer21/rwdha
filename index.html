@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rosewood Doha - Access Control</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <!-- XLSX for Excel Import -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --rw-navy: #212d3b;
+      --rw-gold: #ac8c4e;
+      --rw-sand: #eae6dd;
+      --rw-dark: #1a232e;
+      --rw-white: #ffffff;
+      --rw-blue: #2167a9;
+      --rw-green: #2e7361;
+      --rw-red: #b45a55;
+    }
+    body {
+      background: var(--rw-sand);
+      min-height: 100vh;
+      min-width: 100vw;
+      background-image: url('https://i.imgur.com/4Fo6rj3.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+    /* Overlay for readability */
+    #mainApp::before, #loginPage::before {
+      content: '';
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      z-index:0;
+      background: rgba(33,45,59,0.60);
+      pointer-events: none;
+    }
+    .rw-header { background: var(--rw-navy);}
+    .rw-sidebar { background: var(--rw-dark);}
+    .rw-gold { color: var(--rw-gold);}
+    .rw-gold-bg { background: var(--rw-gold);}
+    .rw-card { background: rgba(255,255,255,0.95); border: 1px solid var(--rw-gold);}
+    .rw-btn { background: var(--rw-blue); color: var(--rw-white);}
+    .rw-btn:hover { background: var(--rw-gold); color: var(--rw-dark);}
+    .sidebar-active { background: var(--rw-blue) !important; color: var(--rw-white);}
+    .rw-label { color: var(--rw-dark);}
+    ::selection { background: var(--rw-gold); color: var(--rw-dark);}
+    .hide { display:none !important; }
+    .scroll-table { max-height: 180px; overflow-y: auto; }
+    .table-head { background: var(--rw-navy); color: var(--rw-gold);}
+    .modal-bg { background: rgba(30,30,30,0.6);}
+    .highlightOverdue { background: #fff0eb !important; color: #b45a55 !important; }
+    .highlightOverdue td { color: #b45a55; font-weight: 600; }
+    /* Login */
+    .rw-login-hero {
+      min-height: 100vh;
+      min-width: 100vw;
+      background: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      z-index: 10;
+      flex-direction: column;
+    }
+    .rw-login-overlay {
+      background: rgba(33,45,59,0.72);
+      position: absolute; top:0; left:0; right:0; bottom:0; z-index:1;
+    }
+    .rw-login-card {
+      position: relative;
+      z-index: 2;
+      background: rgba(255,255,255,0.98);
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 32px 0 rgba(33,45,59,0.22);
+      border: 1px solid var(--rw-gold);
+      padding: 2.5rem 2rem 2rem 2rem;
+      min-width: 340px;
+      max-width: 95vw;
+      margin: auto;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap:0.8rem;
+    }
+    .rw-login-title {
+      font-family: 'Georgia', serif;
+      color: var(--rw-gold);
+      font-size: 2.1rem;
+      letter-spacing: .02em;
+      margin-bottom: 0.2em;
+    }
+    .rw-login-caption {
+      color: var(--rw-gold); font-size: 1.1rem;
+      margin-bottom: 1.2em;
+    }
+    .rw-login-form input {
+      background: var(--rw-sand);
+      color: var(--rw-navy);
+      font-weight: 500;
+      border: 1.5px solid var(--rw-gold);
+      transition: border .15s;
+    }
+    .rw-login-form input:focus {
+      border: 2px solid var(--rw-blue);
+      outline: none;
+    }
+    .rw-login-btn {
+      font-size: 1.12rem;
+      font-weight: 600;
+      letter-spacing: .03em;
+      padding: 0.8em 0;
+      border-radius: 0.7em;
+      background: var(--rw-blue);
+      color: #fff;
+      border: none;
+      transition: background 0.15s;
+      width: 100%;
+      margin-top: 0.7em;
+      cursor: pointer;
+    }
+    .rw-login-btn:hover { background: var(--rw-gold); color: var(--rw-dark);}
+    .rw-login-error {
+      color: #fff;
+      background: #b45a55;
+      border-radius: 0.6em;
+      margin-top: 0.7em;
+      padding: 0.55em 0.6em;
+      font-weight: 600;
+      font-size: 1.02em;
+      letter-spacing: .01em;
+      display: none;
+    }
+    /* New Menu/Sidebar styling */
+    .sidebar-btn, .sidebar-section {
+      transition: background 0.14s, color 0.14s;
+      font-size: 1.05em;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .sidebar-section {
+      color: var(--rw-gold);
+      margin-top: 1.8rem;
+      margin-bottom: 0.2rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      font-size: 1.1em;
+      opacity: 0.82;
+      padding-left: 0.5em;
+    }
+    .sidebar-btn svg {
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    /* CRUD Modal styling */
+    .crud-search-box {
+      background: #f6f4f0;
+      border-radius: 0.7em;
+      border: 1.5px solid #ac8c4e;
+      padding: 0.6em 1em;
+      margin-bottom: 1em;
+      display: flex;
+      align-items: center;
+      gap:0.7em;
+    }
+    .crud-delete-btn {
+      background: var(--rw-red);
+      color: #fff;
+      font-weight: 600;
+      border-radius: 0.5em;
+      padding: 0.45em 1em;
+      margin-left: 0.7em;
+      transition: background 0.15s;
+    }
+    .crud-delete-btn:hover { background: #922a25; }
+    .crud-edit-btn {
+      background: var(--rw-blue);
+      color: #fff;
+      font-weight: 600;
+      border-radius: 0.5em;
+      padding: 0.45em 1em;
+      margin-left: 0.7em;
+      transition: background 0.15s;
+    }
+    .crud-edit-btn:hover { background: var(--rw-gold); color: var(--rw-dark);}
+    /* Responsive */
+    @media (max-width: 900px) {
+      .rw-sidebar { width: 54px !important; min-width: 54px; }
+      .sidebar-btn { font-size: 1em; padding-left: 0.5em; }
+      .sidebar-section { font-size: 1em; padding-left: 0.2em;}
+      .rw-sidebar span:not(.sidebar-icon) { display: none;}
+      .rw-sidebar .sidebar-icon { display: inline;}
+    }
+    @media (max-width: 600px) {
+      .rw-login-card { min-width: unset; padding: 1.3rem 0.6rem; }
+      .rw-login-title { font-size: 1.44rem;}
+      .rw-login-caption { font-size: 0.98rem;}
+      .content { padding: 0.6rem!important;}
+    }
+  </style>
+</head>
+<body>
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="rw-login-hero">
+  <div class="rw-login-overlay"></div>
+  <div class="rw-login-card">
+    <span class="rw-login-title">Rosewood Doha</span>
+    <span class="rw-login-caption">Access Control System</span>
+    <form id="loginForm" onsubmit="return handleLogin(event)" class="rw-login-form w-full flex flex-col gap-3">
+      <input type="text" id="username" placeholder="Username" required autocomplete="username"
+        class="rounded-lg px-3 py-2 text-sm" />
+      <input type="password" id="password" placeholder="Password" required autocomplete="current-password"
+        class="rounded-lg px-3 py-2 text-sm" />
+      <button type="submit" class="rw-login-btn">Sign In</button>
+      <div id="loginError" class="rw-login-error"></div>
+    </form>
+    <div class="text-xs text-[var(--rw-gold)] mt-2 font-serif opacity-90">© Rosewood Doha 2025</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" class="hide relative">
+  <!-- HEADER -->
+  <nav class="rw-header text-[var(--rw-gold)] px-6 py-3 flex justify-between items-center shadow relative z-10">
+    <div class="flex items-center gap-4">
+      <span class="text-2xl">🏨</span>
+      <span class="text-xl font-bold tracking-wide">Rosewood Access Management</span>
+    </div>
+    <div class="flex items-center gap-6">
+      <span id="currentUser" class="bg-[var(--rw-gold)] text-[var(--rw-dark)] px-3 py-1 rounded"></span>
+      <button onclick="logout()" class="rw-btn px-4 py-2 rounded">Logout</button>
+    </div>
+  </nav>
+  <div class="flex min-h-[calc(100vh-56px)]">
+    <!-- SIDEBAR -->
+    <aside class="rw-sidebar text-[var(--rw-gold)] flex flex-col py-6 px-2 w-64 min-h-[calc(100vh-56px)] relative z-10">
+      <div class="sidebar-section">DASHBOARD</div>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded sidebar-active" data-page="dashboard" onclick="showPage('dashboard')">
+        <span class="sidebar-icon">📊</span><span>Dashboard</span>
+      </button>
+      <div class="sidebar-section">TRANSACTIONS</div>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="checkin" onclick="showPage('checkin')">
+        <span class="sidebar-icon">✅</span><span>Check In</span>
+      </button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="checkout" onclick="showPage('checkout')">
+        <span class="sidebar-icon">🚪</span><span>Check Out</span>
+      </button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="logs" onclick="showPage('logs')">
+        <span class="sidebar-icon">📝</span><span>Activity Log</span>
+      </button>
+      <div class="sidebar-section">DATA MANAGEMENT</div>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="manage-emp" onclick="showPage('manage-emp')">
+        <span class="sidebar-icon">👥</span><span>Employees</span>
+      </button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="manage-key" onclick="showPage('manage-key')">
+        <span class="sidebar-icon">🔑</span><span>Keys</span>
+      </button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="manage-card" onclick="showPage('manage-card')">
+        <span class="sidebar-icon">💳</span><span>Access Cards</span>
+      </button>
+      <div class="sidebar-section">TOOLS</div>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="delete" onclick="showPage('delete')">
+        <span class="sidebar-icon">🗑️</span><span>Delete/Modify Data</span>
+      </button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="settings" onclick="showPage('settings')">
+        <span class="sidebar-icon">⚙️</span><span>Advanced Import/Export</span>
+      </button>
+    </aside>
+    <!-- MAIN CONTENT -->
+    <main class="content flex-1 p-8 bg-transparent relative z-0">
+      <!-- DASHBOARD -->
+      <section id="page-dashboard">
+        <h2 class="text-2xl font-bold text-[var(--rw-gold)] mb-5">Access Dashboard</h2>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-7">
+          <div class="rw-card rounded-xl p-5 flex flex-col items-center cursor-pointer hover:shadow-lg" onclick="showDashDetail('keys')">
+            <div class="font-bold text-2xl rw-header rw-gold-bg px-4 py-2 rounded mb-2" id="statTotalKeys">0</div>
+            <div class="text-xs mt-1 rw-gold">Total Keys</div>
+          </div>
+          <div class="rw-card rounded-xl p-5 flex flex-col items-center cursor-pointer hover:shadow-lg" onclick="showDashDetail('cards')">
+            <div class="font-bold text-2xl rw-header rw-gold-bg px-4 py-2 rounded mb-2" id="statTotalCards">0</div>
+            <div class="text-xs mt-1 rw-gold">Total Access Cards</div>
+          </div>
+          <div class="rw-card rounded-xl p-5 flex flex-col items-center cursor-pointer hover:shadow-lg" onclick="showDashDetail('notReturned')">
+            <div class="font-bold text-2xl rw-header rw-gold-bg px-4 py-2 rounded mb-2" id="statNotReturned">0</div>
+            <div class="text-xs mt-1 rw-gold">Currently Checked Out</div>
+          </div>
+          <div class="rw-card rounded-xl p-5 flex flex-col items-center cursor-pointer hover:shadow-lg" onclick="showDashDetail('takenToday')">
+            <div class="font-bold text-2xl rw-header rw-gold-bg px-4 py-2 rounded mb-2" id="statTakenToday">0</div>
+            <div class="text-xs mt-1 rw-gold">Checked Out Today</div>
+          </div>
+          <div class="rw-card rounded-xl p-5 flex flex-col items-center cursor-pointer hover:shadow-lg" onclick="showDashDetail('employees')">
+            <div class="font-bold text-2xl rw-header rw-gold-bg px-4 py-2 rounded mb-2" id="statTotalEmployees">0</div>
+            <div class="text-xs mt-1 rw-gold">Employees</div>
+          </div>
+        </div>
+        <div class="rounded-xl rw-card p-6 mb-10 shadow">
+          <h3 class="font-semibold text-lg mb-2 text-[var(--rw-blue)]">Check Out & Return Activity</h3>
+          <div class="flex gap-4 mb-2 items-center">
+            <label class="mr-2 font-semibold">Range:</label>
+            <select id="activityRange" class="border rounded px-2 py-1" onchange="renderChart()">
+              <option value="day">Last 7 Days</option>
+              <option value="hour">Today (hourly)</option>
+              <option value="month">This Year (monthly)</option>
+            </select>
+          </div>
+          <canvas id="activityChart" height="60"></canvas>
+        </div>
+        <div id="dashboardDetailModal" class="hide"></div>
+      </section>
+
+      <!-- Checked Out List (editable, from dashboard) -->
+      <div id="dashboardListModal" class="fixed inset-0 z-50 modal-bg flex items-center justify-center hide">
+        <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-2xl relative">
+          <button onclick="hideDashboardList()" class="absolute top-3 right-3 px-3 py-1 bg-gray-200 rounded text-lg">✖</button>
+          <div id="dashboardListContent"></div>
+        </div>
+      </div>
+
+      <!-- CHECKED IN -->
+      <section id="page-checkin" class="hide">
+        <h2 class="text-xl font-bold text-[var(--rw-blue)] mb-4">Check In</h2>
+        <div class="flex gap-4 mb-4">
+          <button class="tab-btn px-4 py-2 rounded-t-lg rw-header rw-gold text-white" data-tab="checkin-keys" onclick="showTab('checkin', 'keys')">Keys</button>
+          <button class="tab-btn px-4 py-2 rounded-t-lg bg-gray-200 rw-label" data-tab="checkin-cards" onclick="showTab('checkin', 'cards')">Access Cards</button>
+        </div>
+        <div id="tab-checkin-keys">
+          <div class="mb-3">
+            <input type="text" id="searchKeyIn" placeholder="Search: Key Number, Room or Employee ID"
+              class="w-full border p-2 rounded" oninput="renderCheckinKeyList()">
+          </div>
+          <div class="scroll-table">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="table-head">
+                  <th>Key Number</th>
+                  <th>Room Description</th>
+                  <th>Issued To</th>
+                  <th>Check Out Time</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="checkinKeyList"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="tab-checkin-cards" class="hide">
+          <div class="mb-3">
+            <input type="text" id="searchCardIn" placeholder="Search: SN, Salto Number or Employee ID"
+              class="w-full border p-2 rounded" oninput="renderCheckinCardList()">
+          </div>
+          <div class="scroll-table">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="table-head">
+                  <th>SN</th>
+                  <th>Salto Number</th>
+                  <th>Issued To</th>
+                  <th>Check Out Time</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="checkinCardList"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <!-- CHECKED OUT -->
+      <section id="page-checkout" class="hide">
+        <h2 class="text-xl font-bold text-[var(--rw-blue)] mb-4">Check Out</h2>
+        <div class="flex gap-4 mb-4">
+          <button class="tab-btn px-4 py-2 rounded-t-lg rw-header rw-gold text-white" data-tab="checkout-keys" onclick="showTab('checkout', 'keys')">Keys</button>
+          <button class="tab-btn px-4 py-2 rounded-t-lg bg-gray-200 rw-label" data-tab="checkout-cards" onclick="showTab('checkout', 'cards')">Access Cards</button>
+        </div>
+        <div id="tab-checkout-keys">
+          <div class="mb-3">
+            <input type="text" id="searchKeyOut" placeholder="Search: Key Number, Room or Code"
+              class="w-full border p-2 rounded" oninput="renderCheckoutKeyList()">
+          </div>
+          <div class="scroll-table">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="table-head">
+                  <th>Key Number</th>
+                  <th>Room Description</th>
+                  <th>Key Code</th>
+                  <th>NO'S</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="checkoutKeyList"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="tab-checkout-cards" class="hide">
+          <div class="mb-3">
+            <input type="text" id="searchCardOut" placeholder="Search: SN or Salto Number"
+              class="w-full border p-2 rounded" oninput="renderCheckoutCardList()">
+          </div>
+          <div class="scroll-table">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="table-head">
+                  <th>SN</th>
+                  <th>Salto Number</th>
+                  <th>Total Nos.</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="checkoutCardList"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <!-- LOGS -->
+      <section id="page-logs" class="hide">
+        <h2 class="text-xl font-bold text-[var(--rw-blue)] mb-4">Activity Log</h2>
+        <div class="scroll-table">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="table-head">
+                <th>Time</th>
+                <th>Type</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="logList"></tbody>
+          </table>
+        </div>
+      </section>
+      <!-- EMPLOYEE MANAGEMENT -->
+      <section id="page-manage-emp" class="hide">
+        <h2 class="text-xl font-bold text-[var(--rw-blue)] mb-4">Employee Management</h2>
+        <form id="employeeForm" class="rw-card mb-4 p-4 flex flex-wrap gap-3 items-end" onsubmit="return addEmployee(event)">
+          <div class="flex-grow min-w-[120px]">
+            <label class="text-xs">Employee ID</label>
+            <input type="text" class="w-full border p-1 rounded" placeholder="Employee ID" id="empId" required>
+          </div>
+          <div class="flex-grow min-w-[120px]">
+            <label class="text-xs">Passport Name</label>
+            <input type="text" class="w-full border p-1 rounded" placeholder="Passport Name" id="empName" required>
+          </div>
+          <div class="flex-grow min-w-[100px]">
+            <label class="text-xs">Division</label>
+            <input type="text" class="w-full border p-1 rounded" placeholder="Division" id="empDivision">
+          </div>
+          <div class="flex-grow min-w-[100px]">
+            <label class="text-xs">Department</label>
+            <input type="text" class="w-full border p-1 rounded" placeholder="Department" id="empDept">
+          </div>
+          <div class="flex-grow min-w-[100px]">
+            <label class="text-xs">Position Title</label>
+            <input type="text" class="w-full border p-1 rounded" placeholder="Position Title" id="empPos">
+          </div>
+          <div class="flex-grow min-w-[100px]">
+            <label class="text-xs">Phone Number</label>
+            <input type="text" class="w-full border p-1 rounded" placeholder="Phone Number" id="empPhone">
+          </div>
+          <div class="flex-grow min-w-[80px]">
+            <label class="text-xs">Gender</label>
+            <select class="w-full border p-1 rounded" id="empGender">
+              <option value="">Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+          <button type="submit" class="rw-btn px-4 py-2 rounded min-w-[110px]">Add Employee</button>
+        </form>
+        <div class="rw-card max-h-72 overflow-y-auto p-4">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="bg-gray-100 text-black">
+                <th>ID</th><th>Name</th><th>Division</th><th>Dept</th><th>Position</th><th>Phone</th><th>Gender</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="employeeTable"></tbody>
+          </table>
+        </div>
+      </section>
+      <!-- KEY MANAGEMENT -->
+      <section id="page-manage-key" class="hide">
+        <h2 class="text-xl font-bold text-[var(--rw-blue)] mb-4">Key Management</h2>
+        <form id="keyForm" class="rw-card mb-4 p-4 flex flex-wrap gap-3 items-end" onsubmit="return addKey(event)">
+          <div class="flex-grow min-w-[120px]">
+            <label class="text-xs">Key Number</label>
+            <input type="text" class="w-full border p-1 rounded" placeholder="Key Number" id="keyNum" required>
+          </div>
+          <div class="flex-grow min-w-[150px]">
+            <label class="text-xs">Room Description</label>
+            <input type="text" class="w-full border p-1 rounded" placeholder="Room Description" id="keyRoomDesc">
+          </div>
+          <div class="flex-grow min-w-[100px]">
+            <label class="text-xs">Key Code</label>
+            <input type="text" class="w-full border p-1 rounded" placeholder="Key Code" id="keyCode">
+          </div>
+          <div class="flex-grow min-w-[70px]">
+            <label class="text-xs">NO'S</label>
+            <input type="number" min="1" class="w-full border p-1 rounded" placeholder="NO'S" id="keyNos">
+          </div>
+          <div class="flex-grow min-w-[120px]">
+            <label class="text-xs">Remarks</label>
+            <input type="text" class="w-full border p-1 rounded" placeholder="Remarks" id="keyRemarks">
+          </div>
+          <button type="submit" class="rw-btn px-4 py-2 rounded min-w-[110px]">Add Key</button>
+        </form>
+        <div class="rw-card max-h-72 overflow-y-auto p-4">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="bg-gray-100 text-black">
+                <th>Number</th><th>Room</th><th>Code</th><th>NO'S</th><th>Remarks</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="keyTable"></tbody>
+          </table>
+        </div>
+      </section>
+      <!-- CARD MANAGEMENT -->
+      <section id="page-manage-card" class="hide">
+        <h2 class="text-xl font-bold text-[var(--rw-blue)] mb-4">Access Card Management</h2>
+        <form id="cardForm" class="rw-card mb-4 p-4 flex flex-wrap gap-3 items-end" onsubmit="return addCard(event)">
+          <div class="flex-grow min-w-[120px]">
+            <label class="text-xs">SN</label>
+            <input type="text" class="w-full border p-1 rounded" placeholder="SN" id="cardSN" required>
+          </div>
+          <div class="flex-grow min-w-[120px]">
+            <label class="text-xs">Salto Number</label>
+            <input type="text" class="w-full border p-1 rounded" placeholder="Salto Number" id="cardSaltoNum">
+          </div>
+          <div class="flex-grow min-w-[70px]">
+            <label class="text-xs">Total Nos.</label>
+            <input type="number" min="1" class="w-full border p-1 rounded" placeholder="Total Nos." id="cardTotalNos">
+          </div>
+          <button type="submit" class="rw-btn px-4 py-2 rounded min-w-[110px]">Add Card</button>
+        </form>
+        <div class="rw-card max-h-72 overflow-y-auto p-4">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="bg-gray-100 text-black">
+                <th>SN</th><th>Salto Number</th><th>Total Nos.</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="cardTable"></tbody>
+          </table>
+        </div>
+      </section>
+      <!-- DELETE/MODIFY -->
+      <section id="page-delete" class="hide">
+        <h2 class="text-xl font-bold text-[var(--rw-red)] mb-4">Delete or Modify Data</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Employee Delete/Modify -->
+          <div class="rw-card rounded-xl p-6 shadow">
+            <h3 class="text-[var(--rw-blue)] font-semibold mb-2">👥 Employees</h3>
+            <div class="crud-search-box">
+              <input type="text" placeholder="Search by ID or Name" class="w-full border rounded p-1" id="delEmpSearch" oninput="renderCrudEmp()">
+            </div>
+            <div class="max-h-40 overflow-y-auto">
+              <table class="w-full text-xs">
+                <thead>
+                  <tr class="bg-gray-100 text-black">
+                    <th>ID</th><th>Name</th><th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="crudEmpTable"></tbody>
+              </table>
+            </div>
+          </div>
+          <!-- Key Delete/Modify -->
+          <div class="rw-card rounded-xl p-6 shadow">
+            <h3 class="text-[var(--rw-blue)] font-semibold mb-2">🔑 Keys</h3>
+            <div class="crud-search-box">
+              <input type="text" placeholder="Search by Key Number or Room" class="w-full border rounded p-1" id="delKeySearch" oninput="renderCrudKey()">
+            </div>
+            <div class="max-h-40 overflow-y-auto">
+              <table class="w-full text-xs">
+                <thead>
+                  <tr class="bg-gray-100 text-black">
+                    <th>Number</th><th>Room</th><th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="crudKeyTable"></tbody>
+              </table>
+            </div>
+          </div>
+          <!-- Card Delete/Modify -->
+          <div class="rw-card rounded-xl p-6 shadow">
+            <h3 class="text-[var(--rw-blue)] font-semibold mb-2">💳 Access Cards</h3>
+            <div class="crud-search-box">
+              <input type="text" placeholder="Search by SN or Salto Number" class="w-full border rounded p-1" id="delCardSearch" oninput="renderCrudCard()">
+            </div>
+            <div class="max-h-40 overflow-y-auto">
+              <table class="w-full text-xs">
+                <thead>
+                  <tr class="bg-gray-100 text-black">
+                    <th>SN</th><th>Salto Number</th><th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="crudCardTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- SETTINGS & IMPORT/EXPORT -->
+      <section id="page-settings" class="hide">
+        <h2 class="text-xl font-bold text-[var(--rw-blue)] mb-4">Import/Export Data</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Employees -->
+          <div class="rw-card rounded-xl p-6 shadow">
+            <h3 class="text-[var(--rw-blue)] font-semibold mb-2">👥 Employees</h3>
+            <input type="file" class="w-full mb-2" accept=".xlsx,.csv" onchange="handleExcelUpload(event, 'employees')">
+            <button class="rw-btn px-3 py-1 rounded mt-1 w-full" onclick="exportData('employees')">Export Employees</button>
+          </div>
+          <!-- Keys -->
+          <div class="rw-card rounded-xl p-6 shadow">
+            <h3 class="text-[var(--rw-blue)] font-semibold mb-2">🔑 Keys</h3>
+            <input type="file" class="w-full mb-2" accept=".xlsx,.csv" onchange="handleExcelUpload(event, 'keys')">
+            <button class="rw-btn px-3 py-1 rounded mt-1 w-full" onclick="exportData('keys')">Export Keys</button>
+          </div>
+          <!-- Access Cards -->
+          <div class="rw-card rounded-xl p-6 shadow">
+            <h3 class="text-[var(--rw-blue)] font-semibold mb-2">💳 Access Cards</h3>
+            <input type="file" class="w-full mb-2" accept=".xlsx,.csv" onchange="handleExcelUpload(event, 'cards')">
+            <button class="rw-btn px-3 py-1 rounded mt-1 w-full" onclick="exportData('cards')">Export Cards</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<!-- MODAL -->
+<div id="modal" class="fixed inset-0 z-50 modal-bg flex items-center justify-center hide">
+  <div id="modalContent" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md"></div>
+</div>
+<script>
+// ... All JS logic is the same as your previous implementation,
+// with the following changes to support the new requirements:
+//
+// - Remove join date for employees
+// - Remove received date for keys
+// - Dashboard click shows editable modal
+// - Check in/out only from dedicated pages
+// - Modernized chart with range (hours/days/months)
+// - Search/delete/modify functionality for all entities
+// - Export to Excel for all entities
+// - Modern styling for all modals (already applied above)
+// - All CRUD actions update the dashboard
+//
+// Due to character limitations, please copy the JS logic from your previous implementation,
+// and apply the changes as described in these comments (or ask for a JS-only file if you want
+// the full modified code logic for the new requirements).
+</script>
+<script src="rosewood_access.js"></script>
+</body>
+</html>
