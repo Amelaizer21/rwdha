@@ -2,250 +2,163 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Rosewood Key & Access Card Inventory</title>
+  <!-- Font Awesome, Tailwind, Chart.js, XLSX -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       --deep-blue: #0a1433;
-      --rosewood-gold: #f5c05e;
-      --rosewood-white: #fff;
-      --rosewood-black: #000;
-      --rosewood-grey: #f4f6fb;
-      --danger: #f43f5e;
-      --highlight: #fee2e2;
+      --white: #fff;
+      --black: #111;
+      --table-bg: #f8fafd;
+      --input-bg: #f1f3f7;
+      --danger: #e11d48;
+      --box-shadow: 0 8px 32px 0 rgba(10,20,51,.13);
     }
-    body {
+    html, body {
       background: var(--deep-blue);
-      color: var(--rosewood-white);
+      color: var(--white);
       font-family: 'Segoe UI', Arial, sans-serif;
       min-height: 100vh;
     }
     .rw-header {
       background: var(--deep-blue);
-      color: var(--rosewood-gold);
+      color: var(--white);
     }
     .rw-card {
-      background: var(--rosewood-white);
+      background: var(--white);
       color: var(--deep-blue);
-      border: 2px solid var(--rosewood-black);
+      border: 2px solid var(--black);
       border-radius: 1rem;
-      box-shadow: 0 8px 32px 0 rgba(10,20,51,.13);
+      box-shadow: var(--box-shadow);
     }
     .rw-btn {
-      background: var(--rosewood-gold);
-      color: var(--deep-blue);
+      background: var(--deep-blue);
+      color: var(--white);
       font-weight: 600;
       border-radius: 0.6em;
+      border: 2px solid var(--black);
       transition: background 0.2s, color 0.2s;
-      border: 2px solid var(--rosewood-black);
     }
     .rw-btn:hover {
-      background: var(--deep-blue);
-      color: var(--rosewood-gold);
-      border: 2px solid var(--rosewood-gold);
+      background: var(--white);
+      color: var(--deep-blue);
+      border: 2px solid var(--deep-blue);
     }
     .sidebar-active {
-      background: var(--rosewood-gold) !important;
+      background: var(--white) !important;
       color: var(--deep-blue) !important;
     }
     .rw-sidebar {
       background: var(--deep-blue);
-      color: var(--rosewood-gold);
-      border-right: 2px solid var(--rosewood-black);
+      color: var(--white);
+      border-right: 2px solid var(--black);
     }
     .modal-bg {
       background: rgba(10,20,51,0.88);
     }
-    .card-anim {
-      transition: box-shadow 0.2s, transform 0.2s;
-    }
-    .card-anim:hover {
-      box-shadow: 0 4px 24px 0 rgba(10,20,51,0.23);
-      transform: scale(1.03);
-    }
+    .card-anim { transition: box-shadow 0.2s, transform 0.2s;}
+    .card-anim:hover { box-shadow: 0 4px 24px 0 rgba(10,20,51,0.23); transform: scale(1.03);}
     .hide { display: none !important; }
     #toast {
-      position: fixed;
-      bottom: 2.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1001;
-      padding: 1rem 2rem;
-      background: var(--rosewood-gold);
-      color: var(--deep-blue);
-      box-shadow: 0 8px 24px 0 rgba(10,20,51,0.17);
-      font-weight: 600;
-      border-radius: 0.7em;
-      border: 2px solid var(--rosewood-black);
+      position: fixed; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+      z-index: 1001; padding: 1rem 2rem; background: var(--white); color: var(--deep-blue);
+      box-shadow: var(--box-shadow); font-weight: 600; border-radius: 0.7em; border: 2px solid var(--black);
       display: none;
     }
-    /* Center login card */
     #loginPage {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--deep-blue);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--deep-blue);
     }
     .rw-login-card {
-      background: var(--rosewood-white);
-      color: var(--deep-blue);
-      border-radius: 1.5rem;
-      box-shadow: 0 8px 32px 0 rgba(10,20,51,0.17);
-      border: 2.5px solid var(--rosewood-black);
-      min-width: 350px;
-      max-width: 98vw;
-      padding: 2.2rem 1.7rem 1.6rem 1.7rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background: var(--white); color: var(--deep-blue);
+      border-radius: 1.5rem; box-shadow: var(--box-shadow); border: 2.5px solid var(--black);
+      min-width: 350px; max-width: 98vw; padding: 2.2rem 1.7rem 1.6rem 1.7rem;
+      display: flex; flex-direction: column; align-items: center;
     }
     .rw-login-title {
-      font-family: 'Georgia', serif;
-      color: var(--deep-blue);
-      font-size: 2.3rem;
-      letter-spacing: .02em;
-      margin-bottom: 0.2em;
-      font-weight: 700;
+      font-family: 'Georgia', serif; color: var(--deep-blue);
+      font-size: 2.3rem; letter-spacing: .02em; margin-bottom: 0.2em; font-weight: 700;
       text-shadow: 0 1px 0 #fff;
     }
     .rw-login-caption {
-      color: var(--rosewood-black);
-      font-size: 1.18rem;
-      margin-bottom: 1.2em;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      opacity:.82;
-      font-weight: 500;
+      color: var(--black); font-size: 1.18rem; margin-bottom: 1.2em;
+      font-family: 'Segoe UI', Arial, sans-serif; opacity:.82; font-weight: 500;
     }
     .rw-login-form input {
-      background: var(--rosewood-grey);
-      color: var(--deep-blue);
-      font-weight: 500;
-      border: 2px solid var(--rosewood-black);
-      border-radius: 0.6em;
-      padding: 0.85em 1em;
+      background: var(--input-bg); color: var(--deep-blue); font-weight: 500;
+      border: 2px solid var(--black); border-radius: 0.6em; padding: 0.85em 1em;
     }
-    .rw-login-form input:focus {
-      border: 2px solid var(--deep-blue);
-      outline: none;
-    }
+    .rw-login-form input:focus { border: 2px solid var(--deep-blue); outline: none;}
     .rw-login-btn {
-      font-size: 1.12rem;
-      font-weight: 700;
-      letter-spacing: .03em;
-      padding: 0.8em 0;
-      border-radius: 0.7em;
-      background: var(--rosewood-gold);
-      color: var(--deep-blue);
-      border: 2px solid var(--rosewood-black);
-      width: 100%;
-      margin-top: 0.5em;
+      font-size: 1.12rem; font-weight: 700; letter-spacing: .03em; padding: 0.8em 0;
+      border-radius: 0.7em; background: var(--deep-blue); color: var(--white);
+      border: 2px solid var(--black); width: 100%; margin-top: 0.5em;
     }
-    .rw-login-btn:hover {
-      background: var(--deep-blue);
-      color: var(--rosewood-gold);
-      border: 2px solid var(--rosewood-gold);
-    }
+    .rw-login-btn:hover { background: var(--white); color: var(--deep-blue); border: 2px solid var(--deep-blue);}
     .rw-login-error {
-      color: #fff;
-      background: var(--danger);
-      border-radius: 0.6em;
-      margin-top: 0.7em;
-      padding: 0.55em 0.6em;
-      font-weight: 600;
-      font-size: 1.02em;
-      letter-spacing: .01em;
-      display: none;
+      color: #fff; background: var(--danger); border-radius: 0.6em; margin-top: 0.7em;
+      padding: 0.55em 0.6em; font-weight: 600; font-size: 1.02em; letter-spacing: .01em; display: none;
     }
     .scroll-table {max-height: 260px; overflow-y: auto;}
     .table-head {
-      background: var(--deep-blue);
-      color: var(--rosewood-gold);
-      font-size: 1em;
-      border-bottom: 2px solid var(--rosewood-black);
+      background: var(--deep-blue); color: var(--white); font-size: 1em; border-bottom: 2px solid var(--black);
     }
     /* Table Borders */
     table {
-      border-collapse: separate;
-      border-spacing: 0;
-      width: 100%;
-      background: var(--rosewood-white);
-      color: var(--deep-blue);
-      border-radius: 0.8em;
-      overflow: hidden;
-      border: 2px solid var(--rosewood-black);
+      border-collapse: separate; border-spacing: 0; width: 100%; background: var(--white);
+      color: var(--deep-blue); border-radius: 0.8em; overflow: hidden; border: 2px solid var(--black);
       margin-bottom: 1.2em;
     }
     th, td {
-      border: 1.5px solid var(--rosewood-black);
-      padding: 0.5em 0.7em;
-      text-align: left;
-      background: var(--rosewood-white);
+      border: 1.5px solid var(--black); padding: 0.5em 0.7em; text-align: left; background: var(--white);
     }
-    tr.highlight, tr.unreturned {
-      background: var(--highlight) !important;
-      border-left: 5px solid var(--danger) !important;
-    }
-    tr:hover {
-      background: #e0e7ef;
-    }
+    tr.unreturned { background: #f1f5fa !important; border-left: 5px solid var(--danger) !important;}
+    tr:hover { background: #e0e7ef !important;}
     .section-title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--deep-blue);
-      margin-bottom: 0.4em;
-      letter-spacing: 0.01em;
-      text-align: left;
+      font-size: 2rem; font-weight: 700; color: var(--deep-blue);
+      margin-bottom: 0.4em; letter-spacing: 0.01em; text-align: left;
     }
     .subheading {
-      color: var(--rosewood-gold);
-      font-weight: 600;
-      font-size: 1.15em;
-      margin-bottom: 0.4em;
-      letter-spacing: 0.04em;
-      text-align: left;
-      opacity: 0.94;
+      color: var(--white); font-weight: 600; font-size: 1.15em;
+      margin-bottom: 0.4em; letter-spacing: 0.04em; text-align: left; opacity: 0.94;
     }
     .report-header {
-      text-align: center;
-      color: var(--deep-blue);
-      font-family: 'Georgia', serif;
-      font-size: 2.1rem;
-      font-weight: 800;
-      margin-bottom: -0.2em;
-      letter-spacing: 0.04em;
+      text-align: center; color: var(--deep-blue); font-family: 'Georgia', serif;
+      font-size: 2.1rem; font-weight: 800; margin-bottom: -0.2em; letter-spacing: 0.04em;
     }
-    .report-range {
-      text-align: center;
-      font-size: 1.08em;
-      margin-bottom: 0.7em;
-      color: var(--rosewood-gold);
-      font-weight: 700;
+    .report-range { text-align: center; font-size: 1.08em; margin-bottom: 0.7em; color: var(--deep-blue); font-weight: 700;}
+    .rw-table-controls {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: .6em;
+    }
+    .rw-table-controls label { color: var(--deep-blue);}
+    .rw-table-controls select, .rw-table-controls input {
+      color: var(--deep-blue); background: var(--input-bg); border: 1.5px solid var(--black); border-radius: 0.35em;
+      padding: 0.2em 0.7em; font-size: 1em;
     }
     @media (max-width: 900px) {
-      .rw-sidebar { width: 54px !important; min-width: 54px; }
-      .sidebar-btn { font-size: 1em; padding-left: 0.5em; }
+      .rw-sidebar { width: 54px !important; min-width: 54px;}
+      .sidebar-btn { font-size: 1em; padding-left: 0.5em;}
       .sidebar-section { font-size: 1em; padding-left: 0.2em;}
       main {padding: 0.7rem !important;}
     }
     @media (max-width: 600px) {
-      .rw-login-card { min-width: unset; padding: 1.3rem 0.6rem; }
+      .rw-login-card { min-width: unset; padding: 1.3rem 0.6rem;}
       .rw-login-title { font-size: 1.44rem;}
       .rw-login-caption { font-size: 0.98rem;}
       .content { padding: 0.6rem!important;}
       .section-title { font-size: 1.35rem;}
-      .report-header { font-size: 1.23rem; }
+      .report-header { font-size: 1.23rem;}
     }
-    input, select, textarea { outline: none; }
+    input, select, textarea { outline: none;}
   </style>
 </head>
 <body>
 <div id="toast"></div>
+<!-- Login Page -->
 <div id="loginPage">
   <div class="rw-login-card">
     <div class="flex flex-col items-center">
@@ -258,52 +171,54 @@
       <button type="submit" class="rw-login-btn">Sign In</button>
       <div id="loginError" class="rw-login-error"></div>
     </form>
-    <div class="text-xs text-[var(--rosewood-gold)] mt-2 font-serif opacity-90">© Rosewood Doha 2025</div>
+    <div class="text-xs text-[var(--deep-blue)] mt-2 font-serif opacity-90">© Rosewood Doha 2025</div>
   </div>
 </div>
+<!-- Modal -->
 <div id="modal" class="fixed inset-0 z-50 modal-bg flex items-center justify-center hide">
   <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6 relative" style="max-height:80vh;overflow-y:auto;">
     <button onclick="hideModal()" class="absolute top-2 right-4 text-xl text-gray-700 hover:text-[var(--deep-blue)]">×</button>
     <div id="modalContent"></div>
   </div>
 </div>
+<!-- Main App -->
 <div id="mainApp" class="hide min-h-screen">
   <nav class="rw-header px-6 py-3 flex justify-between items-center shadow relative z-10">
     <div class="flex items-center gap-4"><span class="text-2xl"><i class="fa-solid fa-hotel"></i></span>
       <span class="text-xl font-bold tracking-wide">Key & Access Card Inventory</span>
     </div>
     <div class="flex items-center gap-6">
-      <span id="currentUser" class="bg-[var(--rosewood-gold)] text-[var(--deep-blue)] px-3 py-1 rounded"></span>
+      <span id="currentUser" class="bg-[var(--white)] text-[var(--deep-blue)] px-3 py-1 rounded"></span>
       <button onclick="logout()" class="rw-btn px-4 py-2 rounded">Logout</button>
     </div>
   </nav>
   <div class="flex min-h-[calc(100vh-56px)]">
     <aside class="rw-sidebar flex flex-col py-6 px-2 w-64 min-h-[calc(100vh-56px)] relative z-10">
       <div class="sidebar-section">MENU</div>
-      <button class="sidebar-btn w-full text-left px-4 py-2 rounded sidebar-active" data-page="dashboard" onclick="showPage('dashboard')"><span class="sidebar-icon"><i class="fa-solid fa-gauge"></i></span><span class="ml-2">Dashboard</span></button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded sidebar-active" data-page="dashboard" onclick="showPage('dashboard')"><span class="sidebar-icon"><i class="fa-solid fa-gauge"></i></span><span class="ml-2 hidden md:inline">Dashboard</span></button>
       <div class="sidebar-section">ACTIVITY</div>
-      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="activity" onclick="showPage('activity')"><span class="sidebar-icon"><i class="fa-solid fa-list"></i></span><span class="ml-2">Activity</span></button>
-      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="checkin" onclick="showPage('checkin')"><span class="sidebar-icon"><i class="fa-solid fa-arrow-right-to-bracket"></i></span><span class="ml-2">Check In</span></button>
-      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="access-history" onclick="showPage('access-history')"><span class="sidebar-icon"><i class="fa-solid fa-clock-rotate-left"></i></span><span class="ml-2">Access History</span></button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="activity" onclick="showPage('activity')"><span class="sidebar-icon"><i class="fa-solid fa-list"></i></span><span class="ml-2 hidden md:inline">Activity</span></button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="checkout" onclick="showPage('checkout')"><span class="sidebar-icon"><i class="fa-solid fa-arrow-right-to-bracket"></i></span><span class="ml-2 hidden md:inline">Check Out</span></button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="access-history" onclick="showPage('access-history')"><span class="sidebar-icon"><i class="fa-solid fa-clock-rotate-left"></i></span><span class="ml-2 hidden md:inline">Access History</span></button>
       <div class="sidebar-section">REPORT</div>
-      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="report" onclick="showPage('report')"><span class="sidebar-icon"><i class="fa-solid fa-file-lines"></i></span><span class="ml-2">Inventory Report</span></button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="report" onclick="showPage('report')"><span class="sidebar-icon"><i class="fa-solid fa-file-lines"></i></span><span class="ml-2 hidden md:inline">Report</span></button>
       <div class="sidebar-section">DATA</div>
-      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="manage-emp" onclick="showPage('manage-emp')"><span class="sidebar-icon"><i class="fa-solid fa-user-plus"></i></span><span class="ml-2">Add Employee</span></button>
-      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="manage-key" onclick="showPage('manage-key')"><span class="sidebar-icon"><i class="fa-solid fa-key"></i></span><span class="ml-2">Add Key</span></button>
-      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="manage-card" onclick="showPage('manage-card')"><span class="sidebar-icon"><i class="fa-solid fa-id-card"></i></span><span class="ml-2">Add Card</span></button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="manage-emp" onclick="showPage('manage-emp')"><span class="sidebar-icon"><i class="fa-solid fa-user-plus"></i></span><span class="ml-2 hidden md:inline">Employees</span></button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="manage-key" onclick="showPage('manage-key')"><span class="sidebar-icon"><i class="fa-solid fa-key"></i></span><span class="ml-2 hidden md:inline">Keys</span></button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="manage-card" onclick="showPage('manage-card')"><span class="sidebar-icon"><i class="fa-solid fa-id-card"></i></span><span class="ml-2 hidden md:inline">Access Cards</span></button>
       <div class="sidebar-section">IMPORT/EXPORT</div>
-      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="importexport" onclick="showPage('importexport')"><span class="sidebar-icon"><i class="fa-solid fa-file-import"></i></span><span class="ml-2">Import/Export</span></button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="importexport" onclick="showPage('importexport')"><span class="sidebar-icon"><i class="fa-solid fa-file-import"></i></span><span class="ml-2 hidden md:inline">Import/Export</span></button>
     </aside>
     <main class="content flex-1 p-8 bg-transparent relative z-0">
       <!-- DASHBOARD -->
       <section id="page-dashboard">
         <h2 class="section-title mb-5">Key &amp; Access Card Dashboard</h2>
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-7">
-          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer" onclick="showDetailModal('employees')" title="View All Employees"><div class="font-bold text-2xl rw-header px-4 py-2 rounded mb-2 counter" id="statTotalEmployees">0</div><div class="font-semibold text-[1.1em]">Total Employees</div></div>
-          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer" onclick="showDetailModal('keys')" title="View All Keys"><div class="font-bold text-2xl rw-header px-4 py-2 rounded mb-2 counter" id="statTotalKeys">0</div><div class="font-semibold text-[1.1em]">Total Keys</div></div>
-          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer" onclick="showDetailModal('cards')" title="View All Cards"><div class="font-bold text-2xl rw-header px-4 py-2 rounded mb-2 counter" id="statTotalCards">0</div><div class="font-semibold text-[1.1em]">Total Cards</div></div>
-          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer" onclick="showDetailModal('logs')" title="View Today's Logs"><div class="font-bold text-2xl rw-header px-4 py-2 rounded mb-2 counter" id="statTodaysLogs">0</div><div class="font-semibold text-[1.1em]">Today's Logs</div></div>
-          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer" onclick="showDetailModal('taken')" title="View Currently Taken"><div class="font-bold text-2xl rw-header px-4 py-2 rounded mb-2 counter" id="statTaken">0</div><div class="font-semibold text-[1.1em]">Not Returned</div></div>
+          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer" onclick="showDetailModal('employees')" title="View All Employees"><div class="font-bold text-2xl rw-header px-4 py-2 rounded mb-2" id="statTotalEmployees">0</div><div class="font-semibold">Employees</div></div>
+          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer" onclick="showDetailModal('keys')" title="View All Keys"><div class="font-bold text-2xl rw-header px-4 py-2 rounded mb-2" id="statTotalKeys">0</div><div class="font-semibold">Keys</div></div>
+          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer" onclick="showDetailModal('cards')" title="View All Cards"><div class="font-bold text-2xl rw-header px-4 py-2 rounded mb-2" id="statTotalCards">0</div><div class="font-semibold">Access Cards</div></div>
+          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer" onclick="showDetailModal('logs')" title="View Logs"><div class="font-bold text-2xl rw-header px-4 py-2 rounded mb-2" id="statTodaysLogs">0</div><div class="font-semibold">Logs</div></div>
+          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer" onclick="showDetailModal('taken')" title="View Currently Taken"><div class="font-bold text-2xl rw-header px-4 py-2 rounded mb-2" id="statTaken">0</div><div class="font-semibold">Currently Taken</div></div>
         </div>
         <div class="rounded-xl rw-card p-6 mb-10 shadow">
           <div class="flex items-center justify-between mb-2">
@@ -327,19 +242,20 @@
           </table>
         </div>
       </section>
-      <!-- CHECK IN -->
-      <section id="page-checkin" class="hide">
-        <h2 class="section-title">Check In</h2>
+      <!-- CHECK OUT -->
+      <section id="page-checkout" class="hide">
+        <h2 class="section-title">Check Out</h2>
         <form id="checkinForm" class="rw-card mb-6 p-5 grid grid-cols-1 md:grid-cols-2 gap-4" onsubmit="return handleCheckIn(event)">
           <input type="text" name="employee_id" id="checkinEmpId" placeholder="Employee ID" required class="border rounded p-2" oninput="autofillCheckin(this.value)" />
           <input type="text" name="name" id="checkinName" placeholder="Name" required class="border rounded p-2" />
           <input type="tel" name="phone" id="checkinPhone" placeholder="Phone Number" required class="border rounded p-2" />
           <input type="text" name="department" id="checkinDept" placeholder="Department" required class="border rounded p-2" />
+          <input type="text" name="position" id="checkinPosition" placeholder="Position" class="border rounded p-2" />
           <input type="text" name="key_taken" id="checkinKey" placeholder="Key Taken" class="border rounded p-2" />
           <input type="text" name="access_card_taken" id="checkinCard" placeholder="Access Card Taken" class="border rounded p-2" />
           <input type="text" name="issued_by" id="checkinIssuedBy" placeholder="Issued By" class="border rounded p-2" />
           <input type="text" name="time_taken" id="checkinTime" class="border rounded p-2" readonly />
-          <button type="submit" class="rw-btn px-4 py-2 rounded col-span-1 md:col-span-2">Check In</button>
+          <button type="submit" class="rw-btn px-4 py-2 rounded col-span-1 md:col-span-2">Check Out</button>
         </form>
         <div class="text-xs" style="color:var(--deep-blue)">If employee info exists, typing Employee ID will autofill details. Time is auto-filled.</div>
       </section>
@@ -358,13 +274,18 @@
         <div class="report-header">Rosewood Doha</div>
         <div class="report-range" id="reportSubheading"></div>
         <h2 class="section-title">Key & Access Card Inventory Report</h2>
-        <div class="flex flex-wrap gap-3 items-center mb-3">
+        <div class="rw-table-controls">
           <label for="reportFrom" class="text-xs font-semibold">From:</label>
-          <input type="date" id="reportFrom" class="border rounded px-2 py-1" />
+          <input type="date" id="reportFrom" />
           <label for="reportTo" class="text-xs font-semibold">To:</label>
-          <input type="date" id="reportTo" class="border rounded px-2 py-1" />
+          <input type="date" id="reportTo" />
           <button onclick="renderReport();return false;" class="rw-btn px-3 py-1 rounded text-xs">Filter</button>
-          <button onclick="downloadPDFReport();" class="rw-btn px-3 py-1 rounded text-xs" style="background:var(--deep-blue);color:var(--rosewood-gold)">Download PDF</button>
+          <button onclick="downloadPDFReport();" class="rw-btn px-3 py-1 rounded text-xs" style="background:var(--deep-blue);color:var(--white)">Download PDF</button>
+          <label for="entriesPerPage" class="text-xs font-semibold ml-4">Show</label>
+          <select id="entriesPerPage" onchange="renderReport()">
+            <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option>
+          </select>
+          <span class="text-xs font-semibold">entries</span>
         </div>
         <div class="scroll-table"><table class="w-full text-xs">
           <thead>
@@ -383,6 +304,7 @@
           </thead>
           <tbody id="reportTable"></tbody>
         </table></div>
+        <div id="reportPagination" class="flex gap-3 mt-2"></div>
       </section>
       <!-- EMPLOYEE MANAGEMENT -->
       <section id="page-manage-emp" class="hide">
@@ -513,6 +435,7 @@ function showPage(page) {
   if(page === 'manage-key') renderKeyTable();
   if(page === 'manage-card') renderCardTable();
   if(page === 'importexport') renderImportExport();
+  if(page === 'checkout') renderCheckOutSection();
 }
 
 // --- Dashboard Counters ---
@@ -533,7 +456,7 @@ function renderDashboard() {
   animateCounter('statTotalEmployees', employees.length);
   animateCounter('statTotalKeys', keys.length);
   animateCounter('statTotalCards', cards.length);
-  animateCounter('statTodaysLogs', logs.filter(l => (new Date(l.time)).toDateString() === (new Date()).toDateString()).length);
+  animateCounter('statTodaysLogs', logs.length);
   animateCounter('statTaken', accessHistory.filter(e=>!e.returned_by).length);
   renderChart();
 }
@@ -552,16 +475,26 @@ function renderChart() {
     data:{
       labels:labels,
       datasets:[
-        {label:'Check In',data:checkinData,borderColor:"rgba(245,192,94,1)",backgroundColor:"rgba(245,192,94,0.17)",tension:0.3},
-        {label:'Check Out',data:checkoutData,borderColor:"rgba(10,20,51,1)",backgroundColor:"rgba(10,20,51,0.14)",tension:0.3}
+        {label:'Check Out',data:checkinData,borderColor:"#0a1433",backgroundColor:"rgba(10,20,51,0.09)",tension:0.3},
+        {label:'Check In',data:checkoutData,borderColor:"#111",backgroundColor:"rgba(17,17,17,0.09)",tension:0.3}
       ]
     },
     options:{
-      plugins:{legend:{display:true}},
+      plugins:{legend:{display:true,labels:{color:'#0a1433'}}},
       responsive:true,
       maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
-      scales:{x:{ticks:{color:'#0a1433'}},y:{beginAtZero:true,ticks:{color:'#0a1433'}}}
+      scales:{
+        x:{
+          grid: {display: false, drawBorder: false},
+          ticks:{color:'#0a1433'}
+        },
+        y:{
+          grid: {display: false, drawBorder: false},
+          beginAtZero:true,
+          ticks:{color:'#0a1433'}
+        }
+      }
     }
   });
 }
@@ -589,7 +522,7 @@ function showDetailModal(type) {
         let highlight = checkedOut && isOver12Hours(checkedOut.time_taken, checkedOut.returned_by) ? 'class="unreturned"' : '';
         return `<tr ${highlight}>
         <td>${k.num}</td><td>${k.room||''}</td><td>${k.code||''}</td><td>${k.nos||''}</td>
-        <td>${checkedOut?`<span class="text-yellow-700 font-bold">TAKEN</span>`:`<span class="text-green-700 font-bold">AVAILABLE</span>`}</td>
+        <td>${checkedOut?`<span class="text-red-700 font-bold">TAKEN</span>`:`<span class="text-green-700 font-bold">AVAILABLE</span>`}</td>
         </tr>`;
       }).join('')}
       </tbody></table></div>`;
@@ -604,23 +537,44 @@ function showDetailModal(type) {
         let highlight = checkedOut && isOver12Hours(checkedOut.time_taken, checkedOut.returned_by) ? 'class="unreturned"' : '';
         return `<tr ${highlight}>
         <td>${c.SN}</td><td>${c.salto||''}</td><td>${c.total||''}</td>
-        <td>${checkedOut?`<span class="text-yellow-700 font-bold">TAKEN</span>`:`<span class="text-green-700 font-bold">AVAILABLE</span>`}</td>
+        <td>${checkedOut?`<span class="text-red-700 font-bold">TAKEN</span>`:`<span class="text-green-700 font-bold">AVAILABLE</span>`}</td>
         </tr>`;
       }).join('')}
       </tbody></table></div>`;
   } else if(type === 'logs') {
-    let today = new Date().toDateString();
-    let todayLogs = logs.filter(l=>(new Date(l.time)).toDateString()===today);
-    content = `<div class="section-title">Today's Logs</div>
+    // LOGS MODAL: full log list with all columns
+    content = `<div class="section-title">Logs</div>
       <div class="scroll-table"><table class="w-full text-xs">
-      <thead><tr class="table-head"><th>Time</th><th>Type</th><th>Details</th><th>Action</th></tr></thead>
+      <thead><tr class="table-head">
+        <th>Employee ID</th><th>Name</th><th>Phone</th><th>Department</th><th>Position</th>
+        <th>Key Taken</th><th>Card Taken</th><th>Issued By</th><th>Checked Out Time</th>
+        <th>Status<br>(Key)</th><th>Status<br>(Card)</th><th>Action</th>
+      </tr></thead>
       <tbody>
-      ${todayLogs.map(l=>`<tr>
-        <td>${new Date(l.time).toLocaleTimeString()}</td>
-        <td>${l.type||''}</td>
-        <td>${l.employee_id||''} ${l.name||''} ${l.key_taken||''} ${l.access_card_taken||''}</td>
-        <td>${l.type==='checkin'?`<button class="rw-btn text-xs px-2 py-1" onclick="promptCheckoutFromLog('${l.employee_id||''}','${l.key_taken||''}','${l.access_card_taken||''}')">Check Out</button>`:""}</td>
-      </tr>`).join('')}
+      ${accessHistory.map(l=>{
+        const emp = employees.find(e=>e.id===l.employee_id) || {};
+        // Status logic
+        let statusKey = l.key_taken ? (l.returned_by ? "Returned" : "Taken") : "";
+        let statusCard = l.access_card_taken ? (l.returned_by ? "Returned" : "Taken") : "";
+        let actionBtn = "";
+        if((l.key_taken && !l.returned_by) || (l.access_card_taken && !l.returned_by)) {
+          actionBtn = `<button class="rw-btn text-xs px-2 py-1" onclick="showReturnModal('${l.employee_id}','${l.key_taken||''}','${l.access_card_taken||''}')">Check In</button>`;
+        }
+        return `<tr>
+          <td>${l.employee_id||''}</td>
+          <td>${l.name||''}</td>
+          <td>${l.phone||''}</td>
+          <td>${l.department||''}</td>
+          <td>${l.position||emp.position||''}</td>
+          <td>${l.key_taken||''}</td>
+          <td>${l.access_card_taken||''}</td>
+          <td>${l.issued_by||''}</td>
+          <td>${l.time_taken||''}</td>
+          <td>${statusKey}</td>
+          <td>${statusCard}</td>
+          <td>${actionBtn}</td>
+        </tr>`;
+      }).join('')}
       </tbody></table></div>`;
   } else if(type === 'taken') {
     let taken = accessHistory.filter(a=>!a.returned_by);
@@ -636,7 +590,7 @@ function showDetailModal(type) {
         <td>${a.access_card_taken||''}</td>
         <td>${a.issued_by||''}</td>
         <td>${a.time_taken||''}</td>
-        <td><button class="rw-btn text-xs px-2 py-1 rounded" onclick="promptReturn('${a.employee_id||''}','${a.key_taken||''}','${a.access_card_taken||''}')">Return Now</button></td>
+        <td><button class="rw-btn text-xs px-2 py-1 rounded" onclick="showReturnModal('${a.employee_id||''}','${a.key_taken||''}','${a.access_card_taken||''}')">Check In</button></td>
       </tr>`;
       }).join('')}
       </tbody></table></div>`;
@@ -654,58 +608,82 @@ function filterTable(tbodyId, val) {
   });
 }
 
+// --- Return Modal (Check In) ---
+function showReturnModal(empId, key, card) {
+  let found = accessHistory.find(a=>a.employee_id===empId&&a.key_taken===key&&a.access_card_taken===card&&!a.returned_by);
+  if(!found) {showToast("Access record not found or already returned."); return;}
+  let emp = employees.find(e=>e.id===empId) || {};
+  let modal = document.getElementById('modal');
+  let modalHtml = `<div class="section-title">Check In Item</div>
+    <form id="returnForm" onsubmit="return submitReturnForm(event,'${empId}','${key}','${card}')">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label>Employee Number</label>
+        <input class="w-full border p-2 rounded" type="text" id="returnEmpId" value="${empId||''}" required oninput="autofillReturnForm(this.value)">
+      </div>
+      <div>
+        <label>Name</label>
+        <input class="w-full border p-2 rounded" type="text" id="returnName" value="${emp.name||found.name||''}" required>
+      </div>
+      <div>
+        <label>Department</label>
+        <input class="w-full border p-2 rounded" type="text" id="returnDept" value="${emp.department||found.department||''}">
+      </div>
+      <div>
+        <label>Position</label>
+        <input class="w-full border p-2 rounded" type="text" id="returnPosition" value="${emp.position||found.position||''}">
+      </div>
+      <div>
+        <label>Phone Number</label>
+        <input class="w-full border p-2 rounded" type="text" id="returnPhone" value="${emp.phone||found.phone||''}">
+      </div>
+      <div>
+        <label>Key Returned</label>
+        <input class="w-full border p-2 rounded" type="text" id="returnKey" value="${key||''}">
+      </div>
+      <div>
+        <label>Access Card Returned</label>
+        <input class="w-full border p-2 rounded" type="text" id="returnCard" value="${card||''}">
+      </div>
+      <div>
+        <label>Person Receiving</label>
+        <input class="w-full border p-2 rounded" type="text" id="returnReceiver" value="">
+      </div>
+    </div>
+    <button class="rw-btn px-4 py-2 rounded mt-6" type="submit">Submit</button>
+    </form>
+    <script>
+      function autofillReturnForm(empId) {
+        let emp = ${JSON.stringify(employees)}.find(e=>e.id===empId) || {};
+        document.getElementById('returnName').value = emp.name||'';
+        document.getElementById('returnDept').value = emp.department||'';
+        document.getElementById('returnPosition').value = emp.position||'';
+        document.getElementById('returnPhone').value = emp.phone||'';
+      }
+    </script>`;
+  document.getElementById('modalContent').innerHTML = modalHtml;
+  modal.classList.remove('hide');
+}
+function submitReturnForm(e, empId, key, card) {
+  e.preventDefault();
+  let found = accessHistory.find(a=>a.employee_id===empId&&a.key_taken===key&&a.access_card_taken===card&&!a.returned_by);
+  if(!found) {showToast("Access record not found or already returned."); return false;}
+  found.returned_by = document.getElementById('returnName').value || found.name;
+  found.receiver = document.getElementById('returnReceiver').value;
+  found.time_brought = new Date().toLocaleString();
+  found.remarks = 'Returned via check-in modal';
+  localStorage.setItem('accessHistory', JSON.stringify(accessHistory));
+  showToast('Item marked as returned!');
+  renderDashboard(); hideModal();
+  return false;
+}
+
 // --- 12 Hours Highlight ---
 function isOver12Hours(time_taken, returned_by) {
   if (!time_taken || returned_by) return false;
   let taken = new Date(time_taken);
   let diff = (Date.now() - taken.getTime()) / (1000*60*60);
   return diff >= 12;
-}
-
-// --- Prompt Return (from taken modal) ---
-function promptReturn(empId, key, card) {
-  let found = accessHistory.find(a=>a.employee_id===empId&&a.key_taken===key&&a.access_card_taken===card&&!a.returned_by);
-  if(!found) return;
-  let returner = prompt("Name of person returning? (Leave blank if same person)");
-  let receiver = prompt("Name of receiving staff?");
-  if(returner && returner!==found.name) {
-    found.returned_by = returner;
-    found.receiver = receiver;
-  } else {
-    found.returned_by = found.name;
-    found.receiver = receiver;
-  }
-  found.time_brought = new Date().toLocaleString();
-  found.remarks = 'Returned via dashboard';
-  localStorage.setItem('accessHistory', JSON.stringify(accessHistory));
-  showToast('Item marked as returned!');
-  renderDashboard(); hideModal();
-}
-
-// --- Prompt Checkout (from today's log) ---
-function promptCheckoutFromLog(empId, key, card) {
-  let found = accessHistory.find(a=>a.employee_id===empId&&a.key_taken===key&&a.access_card_taken===card&&!a.returned_by);
-  if(!found) {
-    showToast("Access record not found or already returned.");
-    return;
-  }
-  let isAnother = confirm("Is the item returned by the same person? Click 'Cancel' to enter another person's details.");
-  let returner = isAnother ? found.name : prompt("Enter name of person returning:");
-  let phone = '';
-  let receiver = '';
-  if(!isAnother) {
-    phone = prompt("Enter phone of person returning:");
-    receiver = prompt("Enter the receiving staff's name:");
-  } else {
-    receiver = prompt("Enter the receiving staff's name:");
-  }
-  found.returned_by = returner || found.name;
-  found.receiver = receiver;
-  found.time_brought = new Date().toLocaleString();
-  found.remarks = isAnother ? "Returned by same" : `Returned by another (${phone})`;
-  localStorage.setItem('accessHistory', JSON.stringify(accessHistory));
-  showToast('Checked out!');
-  renderDashboard(); hideModal();
 }
 
 // --- Activity Table ---
@@ -727,21 +705,23 @@ function renderActivity() {
   });
 }
 
-// --- Check-in Autofill ---
+// --- Check-out Autofill ---
 function autofillCheckin(empId) {
   let existing = employees.find(emp => emp.id === empId.trim());
   if(existing) {
     document.getElementById('checkinName').value = existing.name || '';
     document.getElementById('checkinPhone').value = existing.phone || '';
     document.getElementById('checkinDept').value = existing.department || '';
+    document.getElementById('checkinPosition').value = existing.position || '';
   } else {
     document.getElementById('checkinName').value = '';
     document.getElementById('checkinPhone').value = '';
     document.getElementById('checkinDept').value = '';
+    document.getElementById('checkinPosition').value = '';
   }
 }
 
-// --- Check In Form ---
+// --- Check Out Form ---
 function handleCheckIn(e) {
   e.preventDefault();
   const form = e.target;
@@ -750,6 +730,7 @@ function handleCheckIn(e) {
     name: form.checkinName.value.trim(),
     phone: form.checkinPhone.value.trim(),
     department: form.checkinDept.value.trim(),
+    position: form.checkinPosition.value.trim(),
     key_taken: form.checkinKey.value.trim(),
     access_card_taken: form.checkinCard.value.trim(),
     issued_by: form.checkinIssuedBy.value.trim(),
@@ -758,7 +739,7 @@ function handleCheckIn(e) {
   let existing = employees.find(emp => emp.id === data.employee_id);
   // If not already in employees, add automatically
   if(!existing) {
-    employees.push({ id: data.employee_id, name: data.name, department: data.department, position: '', phone: data.phone });
+    employees.push({ id: data.employee_id, name: data.name, department: data.department, position: data.position, phone: data.phone });
     localStorage.setItem('employees', JSON.stringify(employees));
     renderEmployeeTable();
   }
@@ -767,7 +748,7 @@ function handleCheckIn(e) {
   localStorage.setItem('logs', JSON.stringify(logs));
   localStorage.setItem('accessHistory', JSON.stringify(accessHistory));
   form.reset();
-  showToast('Check-in recorded!');
+  showToast('Check-out recorded!');
   renderDashboard();
   renderActivity();
   return false;
@@ -797,12 +778,14 @@ function renderAccessHistory() {
   });
 }
 
-// --- Report Table ---
+// --- Report Table with Pagination ---
+let reportCurrentPage = 1;
 function renderReport() {
   let from = document.getElementById('reportFrom')?.value;
   let to = document.getElementById('reportTo')?.value;
   let tbody = document.getElementById('reportTable');
   let subheading = document.getElementById('reportSubheading');
+  let entriesPerPage = parseInt(document.getElementById('entriesPerPage').value, 10) || 10;
   tbody.innerHTML = '';
   let filtered = accessHistory.filter(h => {
     let t = h.time_taken ? new Date(h.time_taken) : null;
@@ -811,7 +794,12 @@ function renderReport() {
     return true;
   });
   subheading.textContent = `Key & Access Card Inventory Report (${from?from:'Start'} to ${to?to:'Today'})`;
-  filtered.forEach(h => {
+  // Pagination
+  let totalPages = Math.ceil(filtered.length/entriesPerPage);
+  if(reportCurrentPage > totalPages) reportCurrentPage = totalPages || 1;
+  let startIdx = (reportCurrentPage-1)*entriesPerPage;
+  let pageData = filtered.slice(startIdx, startIdx+entriesPerPage);
+  pageData.forEach(h => {
     let highlight = isOver12Hours(h.time_taken, h.returned_by) ? 'class="unreturned"' : '';
     let tr = document.createElement('tr');
     tr.innerHTML = `
@@ -828,6 +816,15 @@ function renderReport() {
     if (highlight) tr.classList.add('unreturned');
     tbody.appendChild(tr);
   });
+  // Pagination controls
+  let pagination = document.getElementById("reportPagination");
+  if(totalPages>1) {
+    let phtml = '';
+    for(let i=1;i<=totalPages;i++) {
+      phtml += `<button class="rw-btn px-2 py-1 text-xs ${i===reportCurrentPage?'sidebar-active':''}" onclick="reportCurrentPage=${i};renderReport()">${i}</button>`;
+    }
+    pagination.innerHTML = phtml;
+  } else pagination.innerHTML = '';
 }
 
 // --- PDF Report ---
@@ -975,7 +972,7 @@ function removeCard(SN) {
   }
 }
 
-// --- Excel Import/Export ---
+// --- Excel Import/Export (auto-update for each list) ---
 function handleExcelUpload(evt, type) {
   const file = evt.target.files[0];
   if(!file) return;
@@ -987,11 +984,17 @@ function handleExcelUpload(evt, type) {
     const sheet = workbook.Sheets[sheetName];
     const json = XLSX.utils.sheet_to_json(sheet, {header:1});
     if(type==='employees') {
-      let keys = json[0].map(h=>h.toLowerCase());
+      let keysArr = json[0].map(h=>h.toLowerCase()); // e.g. id, name, department, position, phone
       let arr = json.slice(1).map(row=>{
-        let o={}; keys.forEach((k,i)=>o[k]=row[i]); return o;
+        let o={}; keysArr.forEach((k,i)=>o[k]=row[i]); return o;
       });
-      employees = arr;
+      employees = arr.map(emp => ({
+        id: emp["employee id"]||emp["id"]||emp["empid"]||emp["emp id"]||"",
+        name: emp["name"]||"",
+        department: emp["department"]||"",
+        position: emp["position"]||"",
+        phone: emp["phone"]||emp["phone number"]||""
+      }));
       localStorage.setItem('employees', JSON.stringify(employees));
       renderEmployeeTable();
       showToast('Employees imported!');
@@ -1001,7 +1004,13 @@ function handleExcelUpload(evt, type) {
       let arr = json.slice(1).map(row=>{
         let o={}; keysArr.forEach((k,i)=>o[k]=row[i]); return o;
       });
-      keys = arr;
+      keys = arr.map(k=>({
+        num:k["key number"]||k["num"]||"",
+        room:k["room description"]||k["room"]||"",
+        code:k["key code"]||k["code"]||"",
+        nos:k["no's"]||k["nos"]||k["total"]||"",
+        remarks:k["remarks"]||""
+      }));
       localStorage.setItem('keys', JSON.stringify(keys));
       renderKeyTable();
       showToast('Keys imported!');
@@ -1011,41 +1020,51 @@ function handleExcelUpload(evt, type) {
       let arr = json.slice(1).map(row=>{
         let o={}; keysArr.forEach((k,i)=>o[k]=row[i]); return o;
       });
-      cards = arr;
+      cards = arr.map(c=>({
+        SN:c["sn"]||c["s/n"]||c["serial"]||"",
+        salto:c["salto number"]||c["salto"]||"",
+        total:c["total nos."]||c["total"]||c["nos"]||""
+      }));
       localStorage.setItem('cards', JSON.stringify(cards));
       renderCardTable();
       showToast('Cards imported!');
     }
     renderDashboard();
-  };
+  }
   reader.readAsArrayBuffer(file);
 }
 function exportData(type) {
   let data = [];
-  let filename = '';
-  if(type==='employees') { data=employees; filename='employees.xlsx'; }
-  if(type==='keys') { data=keys; filename='keys.xlsx'; }
-  if(type==='cards') { data=cards; filename='cards.xlsx'; }
-  let ws = XLSX.utils.json_to_sheet(data);
+  if(type==='employees') {
+    data = [["Employee ID","Name","Department","Position","Phone"]].concat(employees.map(e=>[e.id,e.name,e.department,e.position||'',e.phone||'']));
+  }
+  if(type==='keys') {
+    data = [["Key Number","Room","Key Code","NO'S","Remarks"]].concat(keys.map(k=>[k.num,k.room,k.code,k.nos,k.remarks||'']));
+  }
+  if(type==='cards') {
+    data = [["SN","Salto Number","Total Nos."]].concat(cards.map(c=>[c.SN,c.salto,c.total]));
+  }
+  let ws = XLSX.utils.aoa_to_sheet(data);
   let wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-  XLSX.writeFile(wb, filename);
+  XLSX.writeFile(wb, type+".xlsx");
 }
-function renderImportExport() { }
 
-// --- DOMContentLoaded ---
-document.addEventListener('DOMContentLoaded', function(){
+// --- Import/Export Render (empty for now, can be extended)
+function renderImportExport() {}
+
+// --- Check Out Section (form re-render)
+function renderCheckOutSection() {
+  // Autofill time
+  document.getElementById('checkinTime').value = new Date().toLocaleString();
+}
+
+window.onload = function() {
   renderDashboard();
   renderEmployeeTable();
   renderKeyTable();
   renderCardTable();
-  renderActivity();
-  renderAccessHistory();
-  renderReport();
-  // Auto time for checkin
-  let timeInput = document.getElementById('checkinTime');
-  if(timeInput) setInterval(()=>{ timeInput.value = new Date().toLocaleString(); }, 1000);
-});
+};
 </script>
 </body>
 </html>
