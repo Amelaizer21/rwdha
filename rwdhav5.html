@@ -14,7 +14,7 @@
     :root {
       --deep-blue: #0a1433;
       --white: #fff;
-      --black: #111;
+      --black: #222;
       --table-bg: #f8fafd;
       --input-bg: #f1f3f7;
       --danger: #e11d48;
@@ -51,7 +51,7 @@
     .rw-card {
       background: var(--white);
       color: var(--deep-blue);
-      border: 2px solid var(--black);
+      border: 1px solid var(--black);
       border-radius: 1rem;
       box-shadow: var(--box-shadow);
       transition: all 0.3s ease;
@@ -61,14 +61,14 @@
       color: var(--white);
       font-weight: 600;
       border-radius: 0.6em;
-      border: 2px solid var(--black);
+      border: 1px solid var(--black);
       transition: all 0.2s;
       cursor: pointer;
     }
     .rw-btn:hover {
       background: var(--white);
       color: var(--deep-blue);
-      border: 2px solid var(--deep-blue);
+      border: 1px solid var(--deep-blue);
       transform: translateY(-2px);
     }
     .sidebar-active {
@@ -78,7 +78,7 @@
     .rw-sidebar {
       background: var(--deep-blue);
       color: var(--white);
-      border-right: 2px solid var(--black);
+      border-right: 1px solid var(--black);
       transition: width 0.3s;
     }
     .modal-bg {
@@ -90,7 +90,7 @@
     #toast {
       position: fixed; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
       z-index: 1001; padding: 1rem 2rem; background: var(--white); color: var(--deep-blue);
-      box-shadow: var(--box-shadow); font-weight: 600; border-radius: 0.7em; border: 2px solid var(--black);
+      box-shadow: var(--box-shadow); font-weight: 600; border-radius: 0.7em; border: 1px solid var(--black);
       display: none;
       animation: fadeInOut 3s ease-in-out;
     }
@@ -106,7 +106,7 @@
     }
     .rw-login-card {
       background: var(--white); color: var(--deep-blue);
-      border-radius: 1.5rem; box-shadow: var(--box-shadow); border: 2.5px solid var(--black);
+      border-radius: 1.5rem; box-shadow: var(--box-shadow); border: 1.5px solid var(--black);
       min-width: 350px; max-width: 98vw; padding: 2.2rem 1.7rem 1.6rem 1.7rem;
       display: flex; flex-direction: column; align-items: center;
       transform: translateY(0);
@@ -126,17 +126,17 @@
     }
     .rw-login-form input {
       background: var(--input-bg); color: var(--deep-blue); font-weight: 500;
-      border: 2px solid var(--black); border-radius: 0.6em; padding: 0.85em 1em;
+      border: 1px solid var(--black); border-radius: 0.6em; padding: 0.85em 1em;
       transition: all 0.3s;
     }
-    .rw-login-form input:focus { border: 2px solid var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);}
+    .rw-login-form input:focus { border: 1px solid var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);}
     .rw-login-btn {
       font-size: 1.12rem; font-weight: 700; letter-spacing: .03em; padding: 0.8em 0;
       border-radius: 0.7em; background: var(--deep-blue); color: var(--white);
-      border: 2px solid var(--black); width: 100%; margin-top: 0.5em;
+      border: 1px solid var(--black); width: 100%; margin-top: 0.5em;
       transition: all 0.3s;
     }
-    .rw-login-btn:hover { background: var(--white); color: var(--deep-blue); border: 2px solid var(--accent); transform: translateY(-2px);}
+    .rw-login-btn:hover { background: var(--white); color: var(--deep-blue); border: 1px solid var(--accent); transform: translateY(-2px);}
     .rw-login-error {
       color: #fff; background: var(--danger); border-radius: 0.6em; margin-top: 0.7em;
       padding: 0.55em 0.6em; font-weight: 600; font-size: 1.02em; letter-spacing: .01em; display: none;
@@ -149,23 +149,23 @@
     }
     .scroll-table {max-height: 260px; overflow-y: auto;}
     .table-head {
-      background: var(--deep-blue); color: var(--white); font-size: 1em; border-bottom: 2px solid var(--black);
+      background: var(--deep-blue); color: var(--white); font-size: 1em; border-bottom: 1px solid var(--black);
       position: sticky;
       top: 0;
     }
     /* Table Borders */
     table {
       border-collapse: separate; border-spacing: 0; width: 100%; background: var(--white);
-      color: var(--deep-blue); border-radius: 0.8em; overflow: hidden; border: 2px solid var(--black);
+      color: var(--deep-blue); border-radius: 0.8em; overflow: hidden; border: 1px solid var(--black);
       margin-bottom: 1.2em;
     }
     th, td {
-      border: 1.5px solid var(--black); padding: 0.5em 0.7em; text-align: left; background: var(--white);
+      border: 1px solid var(--black); padding: 0.5em 0.7em; text-align: left; background: var(--white);
     }
-    tr.unreturned { background: #f1f5fa !important; border-left: 5px solid var(--danger) !important;}
+    tr.unreturned { background: #fff1f2 !important; border-left: 5px solid var(--danger) !important;}
     tr:hover { background: #e0e7ef !important;}
     .section-title {
-      font-size: 2rem; font-weight: 700; color: var(--deep-blue);
+      font-size: 2rem; font-weight: 700; color: var(--white);
       margin-bottom: 0.4em; letter-spacing: 0.01em; text-align: left;
       position: relative;
       padding-bottom: 0.5rem;
@@ -177,7 +177,7 @@
       left: 0;
       width: 80px;
       height: 4px;
-      background: var(--deep-blue);
+      background: var(--white);
       border-radius: 2px;
     }
     .subheading {
@@ -185,49 +185,49 @@
       margin-bottom: 0.4em; letter-spacing: 0.04em; text-align: left; opacity: 0.94;
     }
     .report-header {
-      text-align: center; color: var(--deep-blue); font-family: 'Georgia', serif;
+      text-align: center; color: var(--white); font-family: 'Georgia', serif;
       font-size: 2.1rem; font-weight: 800; margin-bottom: -0.2em; letter-spacing: 0.04em;
     }
     .report-subtitle {
-      text-align: center; font-size: 1.4em; margin-bottom: 0.5em; color: var(--deep-blue); font-weight: 700;
+      text-align: center; font-size: 1.4em; margin-bottom: 0.5em; color: var(--white); font-weight: 700;
     }
-    .report-range { text-align: center; font-size: 1.08em; margin-bottom: 0.7em; color: var(--deep-blue); font-weight: 700;}
+    .report-range { text-align: center; font-size: 1.08em; margin-bottom: 0.7em; color: var(--white); font-weight: 700;}
     .rw-table-controls {
       display: flex; align-items: center; gap: 1rem; margin-bottom: .6em;
       flex-wrap: wrap;
     }
-    .rw-table-controls label { color: var(--deep-blue);}
+    .rw-table-controls label { color: var(--white);}
     .rw-table-controls select, .rw-table-controls input {
-      color: var(--deep-blue); background: var(--input-bg); border: 1.5px solid var(--black); border-radius: 0.35em;
+      color: var(--deep-blue); background: var(--input-bg); border: 1px solid var(--black); border-radius: 0.35em;
       padding: 0.2em 0.7em; font-size: 1em;
     }
     .rd-logo {
       display: flex; align-items: center; justify-content: center;
       width: 60px; height: 60px; background: var(--deep-blue);
       color: white; font-weight: 900; font-size: 2rem;
-      border: 3px solid white; border-radius: 10px;
+      border: 2px solid white; border-radius: 10px;
       margin: 0 auto 1rem;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     .checkin-btn {
       background: var(--success);
       color: white;
-      border: 2px solid var(--success);
+      border: 1px solid var(--success);
     }
     .checkin-btn:hover {
       background: white;
       color: var(--success);
-      border: 2px solid var(--success);
+      border: 1px solid var(--success);
     }
     .checkout-btn {
       background: var(--deep-blue);
       color: white;
-      border: 2px solid var(--deep-blue);
+      border: 1px solid var(--deep-blue);
     }
     .checkout-btn:hover {
       background: white;
       color: var(--deep-blue);
-      border: 2px solid var(--deep-blue);
+      border: 1px solid var(--deep-blue);
     }
     .page-section {
       animation: fadeIn 0.5s ease;
@@ -239,10 +239,10 @@
     .category-title {
       font-size: 1.25rem;
       font-weight: 700;
-      color: var(--deep-blue);
+      color: var(--white);
       margin: 1.5rem 0 0.75rem;
       padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--deep-blue);
+      border-bottom: 2px solid var(--white);
     }
     .form-group {
       margin-bottom: 1rem;
@@ -251,7 +251,7 @@
     .form-group label {
       display: block;
       margin-bottom: 0.5rem;
-      color: var(--deep-blue);
+      color: var(--white);
       font-weight: 600;
       font-size: 0.9rem;
     }
@@ -305,14 +305,14 @@
       background: var(--input-bg); 
       color: var(--deep-blue); 
       font-weight: 500;
-      border: 2px solid var(--black); 
+      border: 1px solid var(--black); 
       border-radius: 0.6em; 
       padding: 0.85em 1em;
       width: 100%;
       transition: all 0.3s;
     }
     .form-input:focus { 
-      border: 2px solid var(--accent); 
+      border: 1px solid var(--accent); 
       outline: none; 
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
@@ -330,24 +330,29 @@
       display: inline-block;
     }
     .status-available {
-      background-color: #d1fae5;
-      color: #065f46;
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
     }
     .status-taken {
       background-color: #fee2e2;
       color: #b91c1c;
+      border: 1px solid #fecaca;
     }
     .status-overdue {
-      background-color: #fef3c7;
-      color: #b45309;
+      background-color: #fef9c3;
+      color: #a16207;
+      border: 1px solid #fef08a;
     }
     .status-pending {
       background-color: #dbeafe;
-      color: #1d4ed8;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
     }
     .status-partial {
-      background-color: #fef3c7;
-      color: #b45309;
+      background-color: #ffedd5;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
     }
     .action-btn {
       padding: 0.25rem 0.75rem;
@@ -389,6 +394,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      border: 1px solid rgba(0,0,0,0.15);
     }
     .dashboard-card-content {
       flex-grow: 1;
@@ -432,7 +438,7 @@
       border-radius: 1rem;
       padding: 1.5rem;
       box-shadow: var(--box-shadow);
-      border: 2px solid var(--black);
+      border: 1px solid var(--black);
     }
     .overview-card h3 {
       font-size: 1.2rem;
@@ -463,8 +469,8 @@
       border-radius: 0.5rem;
     }
     .overdue-item {
-      background-color: #fef3c7;
-      border-left: 3px solid var(--warning);
+      background-color: #fffbeb;
+      border-left: 3px solid #fbbf24;
       padding-left: 0.5rem;
     }
     .notification-badge {
@@ -706,8 +712,8 @@
     }
     .search-input {
       width: 100%;
-      padding: 0.5rem 1rem 0.5rem 2.5rem;
-      border: 2px solid var(--black);
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--black);
       border-radius: 0.6em;
       font-size: 1rem;
     }
@@ -809,39 +815,6 @@
       background-color: rgba(16, 185, 129, 0.3);
       border-left-width: 5px;
     }
-    .barcode-scanner {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-    .barcode-btn {
-      background: var(--deep-blue);
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.2s;
-    }
-    .barcode-btn:hover {
-      background: var(--accent);
-      transform: translateY(-2px);
-    }
-    .barcode-preview {
-      width: 100px;
-      height: 40px;
-      background: #f1f5f9;
-      border: 1px dashed #ccc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      color: #666;
-      border-radius: 0.5rem;
-    }
     .item-category {
       font-size: 0.75rem;
       color: #666;
@@ -888,6 +861,74 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
+    }
+    .overdue-download {
+      background: var(--warning);
+      color: white;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .overdue-download:hover {
+      background: #e0a800;
+    }
+    .dashboard-stat {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+      color: var(--deep-blue);
+    }
+    .dashboard-label {
+      font-size: 0.9rem;
+      color: var(--deep-blue);
+    }
+    .overdue-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .currently-taken-item {
+      padding: 0.75rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .currently-taken-item:last-child {
+      border-bottom: none;
+    }
+    .currently-taken-item-key {
+      background-color: rgba(59, 130, 246, 0.1);
+      border-left: 4px solid var(--key-color);
+    }
+    .currently-taken-item-card {
+      background-color: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid var(--card-color);
+    }
+    .item-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .item-badge-key {
+      background-color: var(--key-selected);
+      color: var(--key-color);
+    }
+    .item-badge-card {
+      background-color: var(--card-selected);
+      color: var(--card-color);
+    }
+    .new-item-indicator {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
     @media (max-width: 900px) {
       .rw-sidebar { width: 54px !important; min-width: 54px;}
@@ -952,6 +993,70 @@
       font-size: 0.75rem;
       color: #4b5563;
       text-align: center;
+    }
+    .overdue-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .overdue-table th {
+      background-color: var(--warning);
+      color: #fff;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    .overdue-table td {
+      padding: 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+    .overdue-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    /* Enhanced Contrast Styles */
+    .status-available {
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    .status-taken {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+    .status-overdue {
+      background-color: #fef9c3;
+      color: #a16207;
+      border: 1px solid #fef08a;
+    }
+    .status-pending {
+      background-color: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+    .status-partial {
+      background-color: #ffedd5;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
+    }
+    tr.unreturned {
+      background: #fff1f2 !important;
+      border-left: 5px solid var(--danger) !important;
+    }
+    .overdue-item {
+      background-color: #fffbeb;
+      border-left: 3px solid #fbbf24;
+      padding-left: 0.5rem;
+    }
+    .selected-item.key-item {
+      background-color: rgba(59, 130, 246, 0.15);
+      border-left: 5px solid #3b82f6;
+    }
+    .selected-item.card-item {
+      background-color: rgba(16, 185, 129, 0.15);
+      border-left: 5px solid #10b981;
+    }
+    .dashboard-card {
+      border: 1px solid rgba(0,0,0,0.15);
     }
   </style>
 </head>
@@ -1020,9 +1125,8 @@
           <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer dashboard-card" onclick="showDetailModal('employees')" title="View All Employees">
             <div class="dashboard-card-content">
               <div class="card-icon"><i class="fa-solid fa-users"></i></div>
-              <div class="stat-value rw-header px-4 py-2 rounded" id="statTotalEmployees">0</div>
-              <div class="dashboard-header">Employee Records</div>
-              <div class="dashboard-card-subtitle">Total registered employees</div>
+              <div class="dashboard-stat" id="statTotalEmployees">0</div>
+              <div class="dashboard-label">Employee Records</div>
             </div>
             <div class="dashboard-card-footer">
               <span>Total Employees</span>
@@ -1032,9 +1136,8 @@
           <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer dashboard-card" onclick="showDetailModal('keys')" title="View All Keys">
             <div class="dashboard-card-content">
               <div class="card-icon"><i class="fa-solid fa-key"></i></div>
-              <div class="stat-value rw-header px-4 py-2 rounded" id="statTotalKeys">0</div>
-              <div class="dashboard-header">Keys Inventory</div>
-              <div class="dashboard-card-subtitle">Physical keys available</div>
+              <div class="dashboard-stat" id="statTotalKeys">0</div>
+              <div class="dashboard-label">Keys Inventory</div>
             </div>
             <div class="dashboard-card-footer">
               <span>Total Keys</span>
@@ -1044,9 +1147,8 @@
           <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer dashboard-card" onclick="showDetailModal('cards')" title="View All Cards">
             <div class="dashboard-card-content">
               <div class="card-icon"><i class="fa-solid fa-id-card"></i></div>
-              <div class="stat-value rw-header px-4 py-2 rounded" id="statTotalCards">0</div>
-              <div class="dashboard-header">Access Card Inventory</div>
-              <div class="dashboard-card-subtitle">Electronic access cards</div>
+              <div class="dashboard-stat" id="statTotalCards">0</div>
+              <div class="dashboard-label">Access Card Inventory</div>
             </div>
             <div class="dashboard-card-footer">
               <span>Total Cards</span>
@@ -1056,9 +1158,8 @@
           <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer dashboard-card" onclick="showDetailModal('logs')" title="View Logs">
             <div class="dashboard-card-content">
               <div class="card-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
-              <div class="stat-value rw-header px-4 py-2 rounded" id="statTotalLogs">0</div>
-              <div class="dashboard-header">Activity Logs</div>
-              <div class="dashboard-card-subtitle">All tracked activities</div>
+              <div class="dashboard-stat" id="statTotalLogs">0</div>
+              <div class="dashboard-label">Activity Logs</div>
             </div>
             <div class="dashboard-card-footer">
               <span>All Activities</span>
@@ -1068,9 +1169,8 @@
           <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer dashboard-card" onclick="showDetailModal('taken')" title="View Currently Taken">
             <div class="dashboard-card-content">
               <div class="card-icon"><i class="fa-solid fa-list-check"></i></div>
-              <div class="stat-value rw-header px-4 py-2 rounded" id="statTaken">0</div>
-              <div class="dashboard-header">Items Currently Out</div>
-              <div class="dashboard-card-subtitle">Keys and cards checked out</div>
+              <div class="dashboard-stat" id="statTaken">0</div>
+              <div class="dashboard-label">Items Currently Out</div>
             </div>
             <div class="dashboard-card-footer">
               <span>Items out</span>
@@ -1087,10 +1187,16 @@
               <i class="fa-solid fa-chevron-down toggle-icon" id="overdueItemsIcon"></i>
             </div>
             <div class="collapsible-content" id="overdueItemsContent">
+              <div class="overdue-controls">
+                <span class="text-sm">Items not returned within 12 hours</span>
+                <button class="overdue-download" onclick="downloadOverduePDFReport()">
+                  <i class="fa-solid fa-file-pdf mr-1"></i> Download PDF
+                </button>
+              </div>
               <div class="table-container">
-                <table>
+                <table class="overdue-table">
                   <thead>
-                    <tr class="table-head">
+                    <tr>
                       <th>Employee</th>
                       <th>ID</th>
                       <th>Phone</th>
@@ -1134,6 +1240,34 @@
           </div>
         </div>
         
+        <!-- NEW: Currently Taken Items Section -->
+        <div class="overview-grid">
+          <div class="overview-card">
+            <div class="collapsible-header" onclick="toggleCollapsible('currentlyTaken')">
+              <h3><i class="fa-solid fa-clipboard-list text-[var(--info)]"></i> Currently Taken Items</h3>
+              <i class="fa-solid fa-chevron-down toggle-icon" id="currentlyTakenIcon"></i>
+            </div>
+            <div class="collapsible-content" id="currentlyTakenContent">
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr class="table-head">
+                      <th>Item</th>
+                      <th>Employee</th>
+                      <th>Department</th>
+                      <th>Time Taken</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="currentlyTakenList">
+                    <tr><td colspan="5">Loading currently taken items...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <div class="rounded-xl rw-card p-6 mb-10 shadow">
           <div class="flex items-center justify-between mb-2">
             <div>
@@ -1172,12 +1306,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="form-group">
                 <label for="checkoutEmpId" class="required">Employee Number</label>
-                <div class="flex gap-2">
-                  <input type="text" name="employee_id" id="checkoutEmpId" class="form-input flex-1" placeholder="Enter employee ID" required oninput="autofillCheckout(this.value)" />
-                  <button type="button" class="barcode-btn" onclick="scanEmployeeId()">
-                    <i class="fa-solid fa-camera"></i> Scan ID
-                  </button>
-                </div>
+                <input type="text" name="employee_id" id="checkoutEmpId" class="form-input" placeholder="Enter employee ID" required oninput="autofillCheckout(this.value)" />
                 <span class="input-hint">Enter 3-10 alphanumeric characters</span>
                 <div class="autofill-notice">If employee exists, details will auto-fill</div>
               </div>
@@ -1209,12 +1338,6 @@
                   <i class="fa-solid fa-search search-icon"></i>
                   <input type="text" id="keySearchInput" class="search-input" placeholder="Search keys..." oninput="filterItems('key')">
                 </div>
-                <div class="barcode-scanner">
-                  <div class="barcode-preview" id="keyBarcodePreview">No barcode</div>
-                  <button type="button" class="barcode-btn" onclick="scanBarcode('key')">
-                    <i class="fa-solid fa-camera"></i> Scan Key
-                  </button>
-                </div>
                 <div class="item-list" id="keyListContainer">
                   <!-- Keys will be dynamically added here -->
                 </div>
@@ -1232,12 +1355,6 @@
                 <div class="search-container">
                   <i class="fa-solid fa-search search-icon"></i>
                   <input type="text" id="cardSearchInput" class="search-input" placeholder="Search cards..." oninput="filterItems('card')">
-                </div>
-                <div class="barcode-scanner">
-                  <div class="barcode-preview" id="cardBarcodePreview">No barcode</div>
-                  <button type="button" class="barcode-btn" onclick="scanBarcode('card')">
-                    <i class="fa-solid fa-camera"></i> Scan Card
-                  </button>
                 </div>
                 <div class="item-list" id="cardListContainer">
                   <!-- Cards will be dynamically added here -->
@@ -1799,20 +1916,90 @@ function animateCounter(id, target) {
     else el.textContent=i;
   }, 24);
 }
+
+// NEW: Function to update currently taken items list
+function updateCurrentlyTakenList() {
+  const currentlyTakenList = document.getElementById('currentlyTakenList');
+  currentlyTakenList.innerHTML = '';
+  
+  // Collect all currently taken items
+  let takenItems = [];
+  
+  accessHistory.forEach(record => {
+    if (!record.items_returned.every(item => item.returned)) {
+      record.items_returned.forEach(item => {
+        if (!item.returned) {
+          takenItems.push({
+            recordId: record.id,
+            itemType: item.type,
+            itemId: item.id,
+            employeeId: record.employee_id,
+            employeeName: record.name,
+            department: record.department,
+            timeTaken: record.time_taken,
+            overdue: isOver12Hours(record.time_taken),
+            description: item.type === 'key' 
+              ? (keys.find(k => k.num === item.id)?.room || '') 
+              : (cards.find(c => c.SN === item.id)?.salto || '')
+          });
+        }
+      });
+    }
+  });
+  
+  if (takenItems.length === 0) {
+    currentlyTakenList.innerHTML = '<tr><td colspan="5">No items currently checked out</td></tr>';
+    return;
+  }
+  
+  // Sort by time taken (newest first)
+  takenItems.sort((a, b) => new Date(b.timeTaken) - new Date(a.timeTaken));
+  
+  // Render items
+  takenItems.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.className = 'new-item-indicator'; // Animation for new items
+    
+    tr.innerHTML = `
+      <td>
+        <span class="item-badge ${item.itemType === 'key' ? 'item-badge-key' : 'item-badge-card'}">
+          ${item.itemType === 'key' ? 'Key' : 'Card'}: ${item.itemId}
+        </span>
+        <div class="text-xs mt-1">${item.description || ''}</div>
+      </td>
+      <td>${item.employeeName} (${item.employeeId})</td>
+      <td>${item.department || ''}</td>
+      <td>${item.timeTaken}</td>
+      <td>${item.overdue ? '<span class="status-badge status-overdue">OVERDUE</span>' : '<span class="status-badge status-taken">TAKEN</span>'}</td>
+    `;
+    
+    currentlyTakenList.appendChild(tr);
+    
+    // Remove animation after 3 seconds
+    setTimeout(() => {
+      tr.classList.remove('new-item-indicator');
+    }, 3000);
+  });
+}
+
 function renderDashboard() {
   animateCounter('statTotalEmployees', employees.length);
   animateCounter('statTotalKeys', keys.length);
   animateCounter('statTotalCards', cards.length);
   animateCounter('statTotalLogs', logs.length);
   
-  // Calculate taken items
-  const takenItems = accessHistory.filter(log => 
-    log.items_returned.some(item => !item.returned)
-  ).length;
-  animateCounter('statTaken', takenItems);
+  // Calculate taken items - now counts individual items
+  let totalItemsOut = 0;
+  accessHistory.forEach(record => {
+    record.items_returned.forEach(item => {
+      if (!item.returned) totalItemsOut++;
+    });
+  });
+  animateCounter('statTaken', totalItemsOut);
   
   renderChart();
   renderOverviewCards();
+  updateCurrentlyTakenList(); // NEW: Update the currently taken list
 }
 
 // Render overview cards
@@ -2113,71 +2300,91 @@ function showDetailModal(type) {
         </tbody></table></div>
       </div>`;
   } else if(type === 'taken') {
-    let taken = accessHistory.filter(a => 
-      a.items_returned.some(item => !item.returned)
-    );
+    // Collect all currently taken items (both keys and cards)
+    let takenItems = [];
+    
+    accessHistory.forEach(record => {
+      if (!record.items_returned.every(item => item.returned)) {
+        record.items_returned.forEach(item => {
+          if (!item.returned) {
+            takenItems.push({
+              recordId: record.id,
+              itemType: item.type,
+              itemId: item.id,
+              employeeId: record.employee_id,
+              employeeName: record.name,
+              department: record.department,
+              timeTaken: record.time_taken,
+              overdue: isOver12Hours(record.time_taken),
+              description: item.type === 'key' 
+                ? (keys.find(k => k.num === item.id)?.room || '') 
+                : (cards.find(c => c.SN === item.id)?.salto || '')
+            });
+          }
+        });
+      }
+    });
     
     content = `<div class="modal-title">Currently Taken Items</div>
       <div class="modal-subtitle">Items that need to be returned</div>
       <div class="modal-grid">
         <div class="modal-grid-item">
           <div class="modal-grid-title">Total Items Out</div>
-          <div class="modal-grid-value">${taken.length}</div>
+          <div class="modal-grid-value">${takenItems.length}</div>
           <div class="modal-grid-footer">Pending return</div>
         </div>
         <div class="modal-grid-item">
-          <div class="modal-grid-title">Overdue</div>
-          <div class="modal-grid-value">${taken.filter(a => isOver12Hours(a.time_taken)).length}</div>
-          <div class="modal-grid-footer">Past due date</div>
-        </div>
-        <div class="modal-grid-item">
           <div class="modal-grid-title">Keys</div>
-          <div class="modal-grid-value">${taken.filter(a => 
-            a.items_returned.some(i => i.type === 'key' && !i.returned)
-          ).length}</div>
+          <div class="modal-grid-value">${takenItems.filter(i => i.itemType === 'key').length}</div>
           <div class="modal-grid-footer">Physical keys out</div>
         </div>
         <div class="modal-grid-item">
           <div class="modal-grid-title">Cards</div>
-          <div class="modal-grid-value">${taken.filter(a => 
-            a.items_returned.some(i => i.type === 'card' && !i.returned)
-          ).length}</div>
+          <div class="modal-grid-value">${takenItems.filter(i => i.itemType === 'card').length}</div>
           <div class="modal-grid-footer">Access cards out</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Overdue</div>
+          <div class="modal-grid-value">${takenItems.filter(i => i.overdue).length}</div>
+          <div class="modal-grid-footer">Past due date</div>
         </div>
       </div>
       <div class="mt-4">
-        <input class="border rounded px-2 py-1 mb-2 w-full" placeholder="Search taken items..." oninput="filterTable('modalTakenTable', this.value)">
-        <div class="modal-table-container"><table class="w-full text-xs compact-table">
-        <thead><tr class="table-head">
-          <th>Employee #</th><th>Name</th><th>Phone</th>
-          <th>Department</th><th>Position</th>
-          <th>Issued By</th>
-          <th>Key Taken</th><th>Card Taken</th>
-          <th>Time Taken</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr></thead>
-        <tbody id="modalTakenTable">
-        ${taken.map(a=>{
-          let highlight = isOver12Hours(a.time_taken);
-          let status = isOver12Hours(a.time_taken) ? 
-            '<span class="status-badge status-overdue">OVERDUE</span>' : 
-            '<span class="status-badge status-taken">TAKEN</span>';
-          return `<tr ${highlight ? 'class="unreturned"' : ''}>
-          <td>${a.employee_id||''}</td>
-          <td>${a.name||''}</td>
-          <td>${a.phone||''}</td>
-          <td>${a.department||''}</td>
-          <td>${a.position||''}</td>
-          <td>${a.issued_by||''}</td>
-          <td>${a.key_taken||''}</td>
-          <td>${a.access_card_taken||''}</td>
-          <td>${a.time_taken||''}</td>
-          <td>${status}</td>
-          <td><button class="rw-btn text-xs px-2 py-1 rounded" onclick="showCheckinModal('${a.id}')">Return Items</button></td>
-        </tr>`;
-        }).join('')}
-        </tbody></table></div>
+        <input class="border rounded px-2 py-1 mb-2 w-full" placeholder="Search taken items..." oninput="filterTakenItems(this.value)">
+        <div class="modal-table-container">
+          <table class="w-full text-xs compact-table">
+            <thead>
+              <tr class="table-head">
+                <th>Item Type</th>
+                <th>Item ID</th>
+                <th>Description</th>
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Time Taken</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="modalTakenTable">
+              ${takenItems.map(item => {
+                return `<tr>
+                  <td>
+                    <span class="item-badge ${item.itemType === 'key' ? 'item-badge-key' : 'item-badge-card'}">
+                      ${item.itemType === 'key' ? 'Key' : 'Card'}
+                    </span>
+                  </td>
+                  <td>${item.itemId}</td>
+                  <td>${item.description || ''}</td>
+                  <td>${item.employeeName} (${item.employeeId})</td>
+                  <td>${item.department || ''}</td>
+                  <td>${item.timeTaken}</td>
+                  <td>${item.overdue ? '<span class="status-badge status-overdue">OVERDUE</span>' : '<span class="status-badge status-taken">TAKEN</span>'}</td>
+                  <td><button class="rw-btn text-xs px-2 py-1 rounded" onclick="showCheckinModal('${item.recordId}')">Return</button></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
       </div>`;
   }
   document.getElementById('modalContent').innerHTML = content;
@@ -2460,8 +2667,15 @@ function handleCheckOut(e) {
   document.getElementById('checkoutTime').value = new Date().toLocaleString();
   
   showToast('Check-out recorded successfully!');
+  
+  // Immediately update the dashboard and currently taken items
   renderDashboard();
-  renderAccessHistory();
+  
+  // Also update the access history page if it's active
+  if (document.querySelector('[data-page="access-history"].sidebar-active')) {
+    renderAccessHistory();
+  }
+  
   return false;
 }
 
@@ -2505,8 +2719,8 @@ function renderAccessHistory() {
       ? '<span class="status-badge status-available">RETURNED</span>' 
       : anyPending 
         ? (isOver12Hours(h.time_taken) 
-          ? '<span class="status-badge status-overdue">OVERDUE</span>' 
-          : '<span class="status-badge status-taken">TAKEN</span>')
+          ? '<span class="status-badge status-overdue">OVERDUE</span>' : 
+          '<span class="status-badge status-taken">TAKEN</span>')
         : '';
     
     let tr = document.createElement('tr');
@@ -2834,7 +3048,7 @@ function renderReport() {
     if (!allReturned && isOver12Hours(h.time_taken)) tr.classList.add('unreturned');
     
     tr.innerHTML = `
-      <td>${h.key_taken||''}</td>
+      <td>${h.key_taken ? `${h.key_taken} (x${h.key_quantity})` : ''}</td>
       <td>${keys.find(k => k.num === h.key_taken)?.room || ''}</td>
       <td>${h.name||''}</td>
       <td>${h.issued_by||''}</td>
@@ -2969,6 +3183,77 @@ function downloadExcelReport() {
   
   // Generate file and download
   XLSX.writeFile(wb, "security_access_report.xlsx");
+}
+
+// --- Overdue PDF Report ---
+function downloadOverduePDFReport() {
+  const overdueItems = accessHistory.filter(a => 
+    !a.items_returned.every(item => item.returned) && 
+    isOver12Hours(a.time_taken)
+  );
+
+  if (overdueItems.length === 0) {
+    showToast('No overdue items to download');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  let doc = new jsPDF();
+  
+  // Report title
+  doc.setFontSize(18);
+  doc.text("Rosewood Hotel", 105, 15, null, null, 'center');
+  doc.setFontSize(16);
+  doc.text("Overdue Items Report", 105, 25, null, null, 'center');
+  
+  // Date range
+  const now = new Date();
+  const dateStr = now.toLocaleDateString();
+  doc.setFontSize(12);
+  doc.text(`Generated on: ${dateStr}`, 105, 35, null, null, 'center');
+  
+  // Table headers
+  const headers = [
+    "Employee", 
+    "ID", 
+    "Phone", 
+    "Item", 
+    "Time Taken", 
+    "Status"
+  ];
+  
+  // Prepare data
+  const rows = overdueItems.map(item => [
+    item.name || '',
+    item.employee_id || '',
+    item.phone || '',
+    `${item.key_taken ? 'Key: ' + item.key_taken : ''} ${item.access_card_taken ? 'Card: ' + item.access_card_taken : ''}`,
+    item.time_taken || '',
+    'OVERDUE'
+  ]);
+  
+  // Create table
+  doc.autoTable({
+    head: [headers],
+    body: rows,
+    startY: 45,
+    styles: { 
+      fontSize: 9,
+      cellPadding: 2
+    },
+    headStyles: {
+      fillColor: [251, 191, 36],
+      textColor: 0,
+      fontStyle: 'bold'
+    },
+    alternateRowStyles: {
+      fillColor: [255, 251, 235]
+    }
+  });
+  
+  // Save the PDF
+  doc.save("overdue_items_report.pdf");
+  showToast('Overdue items PDF downloaded');
 }
 
 // --- Employee Management ---
@@ -3407,17 +3692,6 @@ function renderCheckOutSection() {
 }
 
 // --- Photo Preview ---
-function previewEmployeePhoto(event) {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      document.getElementById('employeePhotoPreview').src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-}
-
 function previewEmpPhoto(event) {
   const file = event.target.files[0];
   if (file) {
@@ -3427,43 +3701,6 @@ function previewEmpPhoto(event) {
     };
     reader.readAsDataURL(file);
   }
-}
-
-// --- Barcode Scanner Simulation ---
-function scanEmployeeId() {
-  const barcodePreview = document.getElementById('checkoutEmpId');
-  barcodePreview.value = "Scanning...";
-  
-  setTimeout(() => {
-    // Simulate a scanned employee ID
-    if (employees.length > 0) {
-      const randomIndex = Math.floor(Math.random() * employees.length);
-      const emp = employees[randomIndex];
-      barcodePreview.value = emp.id;
-      autofillCheckout(emp.id);
-    } else {
-      barcodePreview.value = "EMP" + Math.floor(100 + Math.random() * 900);
-    }
-  }, 1500);
-}
-
-function scanBarcode(type) {
-  const barcodePreview = document.getElementById(`${type}BarcodePreview`);
-  barcodePreview.textContent = "Scanning...";
-  
-  setTimeout(() => {
-    // Simulate a scanned barcode
-    const items = type === 'key' ? keys : cards;
-    if (items.length > 0) {
-      const randomIndex = Math.floor(Math.random() * items.length);
-      const item = items[randomIndex];
-      barcodePreview.textContent = `${type === 'key' ? 'Key' : 'Card'}: ${item.num || item.SN}`;
-      document.getElementById(`${type}SearchInput`).value = type === 'key' ? item.num : item.SN;
-      filterItems(type);
-    } else {
-      barcodePreview.textContent = "No items found";
-    }
-  }, 1500);
 }
 
 window.onload = function() {
