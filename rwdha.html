@@ -1,0 +1,3903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rosewood Key & Access Card Inventory</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    :root {
+      --deep-blue: #0a1433;
+      --white: #fff;
+      --black: #222;
+      --table-bg: #f8fafd;
+      --input-bg: #f1f3f7;
+      --danger: #e11d48;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --info: #3b82f6;
+      --box-shadow: 0 8px 32px 0 rgba(10,20,51,.13);
+      --accent: #3b82f6;
+      --light-accent: #dbeafe;
+      --sidebar-width: 250px;
+      --rose-gold: #b76e79;
+      --light-rose: #f8e9ec;
+      --dark-rose: #8c4a52;
+      --key-color: #3b82f6;
+      --card-color: #10b981;
+      --returned-color: #d1fae5;
+      --key-selected: rgba(59, 130, 246, 0.5);
+      --card-selected: rgba(16, 185, 129, 0.5);
+      --pending-return: #fef3c7;
+      --returned-item: #d1fae5;
+      --new-item: #fffbeb;
+    }
+    html, body {
+      background: var(--deep-blue);
+      color: var(--white);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .rw-header {
+      background: var(--deep-blue);
+      color: var(--white);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .rw-card {
+      background: var(--white);
+      color: var(--deep-blue);
+      border: 1px solid var(--black);
+      border-radius: 1rem;
+      box-shadow: var(--box-shadow);
+      transition: all 0.3s ease;
+    }
+    .rw-btn {
+      background: var(--deep-blue);
+      color: var(--white);
+      font-weight: 600;
+      border-radius: 0.6em;
+      border: 1px solid var(--black);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .rw-btn:hover {
+      background: var(--white);
+      color: var(--deep-blue);
+      border: 1px solid var(--deep-blue);
+      transform: translateY(-2px);
+    }
+    .sidebar-active {
+      background: var(--white) !important;
+      color: var(--deep-blue) !important;
+    }
+    .rw-sidebar {
+      background: var(--deep-blue);
+      color: var(--white);
+      border-right: 1px solid var(--black);
+      transition: width 0.3s;
+    }
+    .modal-bg {
+      background: rgba(10,20,51,0.88);
+    }
+    .card-anim { transition: box-shadow 0.2s, transform 0.2s;}
+    .card-anim:hover { box-shadow: 0 4px 24px 0 rgba(10,20,51,0.23); transform: scale(1.03);}
+    .hide { display: none !important; }
+    #toast {
+      position: fixed; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+      z-index: 1001; padding: 1rem 2rem; background: var(--white); color: var(--deep-blue);
+      box-shadow: var(--box-shadow); font-weight: 600; border-radius: 0.7em; border: 1px solid var(--black);
+      display: none;
+      animation: fadeInOut 3s ease-in-out;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    }
+    #loginPage {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--deep-blue);
+      background-image: linear-gradient(135deg, var(--deep-blue) 0%, #0d1c44 100%);
+    }
+    .rw-login-card {
+      background: var(--white); color: var(--deep-blue);
+      border-radius: 1.5rem; box-shadow: var(--box-shadow); border: 1.5px solid var(--black);
+      min-width: 350px; max-width: 98vw; padding: 2.2rem 1.7rem 1.6rem 1.7rem;
+      display: flex; flex-direction: column; align-items: center;
+      transform: translateY(0);
+      transition: transform 0.3s;
+    }
+    .rw-login-card:hover {
+      transform: translateY(-5px);
+    }
+    .rw-login-title {
+      font-family: 'Georgia', serif; color: var(--deep-blue);
+      font-size: 2.3rem; letter-spacing: .02em; margin-bottom: 0.2em; font-weight: 700;
+      text-shadow: 0 1px 0 #fff;
+    }
+    .rw-login-caption {
+      color: var(--black); font-size: 1.18rem; margin-bottom: 1.2em;
+      font-family: 'Segoe UI', Arial, sans-serif; opacity:.82; font-weight: 500;
+    }
+    .rw-login-form input {
+      background: var(--input-bg); color: var(--deep-blue); font-weight: 500;
+      border: 1px solid var(--black); border-radius: 0.6em; padding: 0.85em 1em;
+      transition: all 0.3s;
+    }
+    .rw-login-form input:focus { border: 1px solid var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);}
+    .rw-login-btn {
+      font-size: 1.12rem; font-weight: 700; letter-spacing: .03em; padding: 0.8em 0;
+      border-radius: 0.7em; background: var(--deep-blue); color: var(--white);
+      border: 1px solid var(--black); width: 100%; margin-top: 0.5em;
+      transition: all 0.3s;
+    }
+    .rw-login-btn:hover { background: var(--white); color: var(--deep-blue); border: 1px solid var(--accent); transform: translateY(-2px);}
+    .rw-login-error {
+      color: #fff; background: var(--danger); border-radius: 0.6em; margin-top: 0.7em;
+      padding: 0.55em 0.6em; font-weight: 600; font-size: 1.02em; letter-spacing: .01em; display: none;
+      animation: shake 0.5s;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+    .scroll-table {max-height: 260px; overflow-y: auto;}
+    .table-head {
+      background: var(--deep-blue); color: var(--white); font-size: 1em; border-bottom: 1px solid var(--black);
+      position: sticky;
+      top: 0;
+    }
+    /* Table Borders */
+    table {
+      border-collapse: separate; border-spacing: 0; width: 100%; background: var(--white);
+      color: var(--deep-blue); border-radius: 0.8em; overflow: hidden; border: 1px solid var(--black);
+      margin-bottom: 1.2em;
+    }
+    th, td {
+      border: 1px solid var(--black); padding: 0.5em 0.7em; text-align: left; background: var(--white);
+    }
+    tr.unreturned { background: #fff1f2 !important; border-left: 5px solid var(--danger) !important;}
+    tr:hover { background: #d1dbe7 !important;}
+    .section-title {
+      font-size: 2rem; font-weight: 700; color: var(--white);
+      margin-bottom: 0.4em; letter-spacing: 0.01em; text-align: left;
+      position: relative;
+      padding-bottom: 0.5rem;
+    }
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 80px;
+      height: 4px;
+      background: var(--white);
+      border-radius: 2px;
+    }
+    .subheading {
+      color: var(--white); font-weight: 600; font-size: 1.15em;
+      margin-bottom: 0.4em; letter-spacing: 0.04em; text-align: left; opacity: 0.94;
+    }
+    .report-header {
+      text-align: center; color: var(--white); font-family: 'Georgia', serif;
+      font-size: 2.1rem; font-weight: 800; margin-bottom: -0.2em; letter-spacing: 0.04em;
+    }
+    .report-subtitle {
+      text-align: center; font-size: 1.4em; margin-bottom: 0.5em; color: var(--white); font-weight: 700;
+    }
+    .report-range { text-align: center; font-size: 1.08em; margin-bottom: 0.7em; color: var(--white); font-weight: 700;}
+    .rw-table-controls {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: .6em;
+      flex-wrap: wrap;
+    }
+    .rw-table-controls label { color: var(--white);}
+    .rw-table-controls select, .rw-table-controls input {
+      color: var(--deep-blue); background: var(--input-bg); border: 1px solid var(--black); border-radius: 0.35em;
+      padding: 0.2em 0.7em; font-size: 1em;
+    }
+    .rd-logo {
+      display: flex; align-items: center; justify-content: center;
+      width: 60px; height: 60px; background: var(--deep-blue);
+      color: white; font-weight: 900; font-size: 2rem;
+      border: 2px solid white; border-radius: 10px;
+      margin: 0 auto 1rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .checkin-btn {
+      background: var(--success);
+      color: white;
+      border: 1px solid var(--success);
+    }
+    .checkin-btn:hover {
+      background: white;
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+    .checkout-btn {
+      background: var(--deep-blue);
+      color: white;
+      border: 1px solid var(--deep-blue);
+    }
+    .checkout-btn:hover {
+      background: white;
+      color: var(--deep-blue);
+      border: 1px solid var(--deep-blue);
+    }
+    .page-section {
+      animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .category-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--white);
+      margin: 1.5rem 0 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--white);
+    }
+    .form-group {
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--white);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .form-group .required::after {
+      content: "*";
+      color: var(--danger);
+      margin-left: 4px;
+    }
+    .form-section {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #e2e8f0;
+    }
+    .form-section-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--deep-blue);
+      margin-top: 0;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+    .form-section-title i {
+      margin-right: 0.5rem;
+      color: var(--accent);
+    }
+    .dashboard-grid-title {
+      color: var(--white);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-align: center;
+      padding: 0.5rem;
+      background: rgba(10, 20, 51, 0.7);
+      border-radius: 0.5rem;
+    }
+    .card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      color: var(--deep-blue);
+    }
+    .card-title {
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      color: var(--deep-blue);
+      font-weight: 600;
+    }
+    .form-input {
+      background: var(--input-bg); 
+      color: var(--deep-blue); 
+      font-weight: 500;
+      border: 1px solid #cbd5e1; 
+      border-radius: 0.6em; 
+      padding: 0.85em 1em;
+      width: 100%;
+      transition: all 0.3s;
+    }
+    .form-input:focus { 
+      border: 1px solid var(--accent); 
+      outline: none; 
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    .input-hint {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+      display: block;
+    }
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .status-available {
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    .status-taken {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+    .status-overdue {
+      background-color: #fef9c3;
+      color: #a16207;
+      border: 1px solid #fef08a;
+    }
+    .status-pending {
+      background-color: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+    .status-partial {
+      background-color: #ffedd5;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
+    }
+    .action-btn {
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.8rem;
+    }
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+    }
+    .dashboard-header {
+      color: var(--white);
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+    .dashboard-card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+    .dashboard-card-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .dashboard-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0 0;
+      margin-top: 0.5rem;
+      border-top: 1px solid rgba(0,0,0,0.1);
+    }
+    .dashboard-card-footer span {
+      font-size: 0.75rem;
+      color: var(--deep-blue);
+      opacity: 0.8;
+    }
+    .dashboard-card-footer button {
+      background: var(--deep-blue);
+      color: white;
+      border-radius: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+    }
+    .dashboard-card-footer button:hover {
+      background: var(--white);
+      color: var(--deep-blue);
+    }
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .overview-card {
+      background: var(--white);
+      color: var(--deep-blue);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: var(--box-shadow);
+      border: 1px solid var(--black);
+    }
+    .overview-card h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .overview-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .overview-card li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .overview-card li:last-child {
+      border-bottom: none;
+    }
+    .overview-card .status {
+      font-size: 0.8rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.5rem;
+    }
+    .overdue-item {
+      background-color: #fffbeb;
+      border-left: 3px solid #fbbf24;
+      padding-left: 0.5rem;
+    }
+    .notification-badge {
+      position: absolute;
+      top: -0.5rem;
+      right: -0.5rem;
+      background-color: var(--danger);
+      color: white;
+      border-radius: 50%;
+      width: 1.25rem;
+      height: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .sidebar-btn {
+      position: relative;
+    }
+    .autofill-notice {
+      font-size: 0.75rem;
+      color: #4b5563;
+      margin-top: 0.25rem;
+      font-style: italic;
+    }
+    .table-container {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .quantity-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--deep-blue);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .quantity-input {
+      width: 40px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 4px;
+    }
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      background: #f5f7fa;
+      border-radius: 0.5rem;
+    }
+    .item-row .item-name {
+      flex-grow: 1;
+    }
+    .item-row .item-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .item-tag {
+      background: var(--light-accent);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .selected-items-container {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f0f4f8;
+      border-radius: 0.75rem;
+      border: 1px solid #d1dbe7;
+    }
+    .selected-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      border-bottom: 1px solid #d1dbe7;
+      margin-bottom: 0.5rem;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+      color: var(--black);
+      font-weight: 600;
+      background: white;
+    }
+    .selected-item:last-child {
+      border-bottom: none;
+    }
+    .pagination {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .pagination-btn {
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+    .pagination-btn.active {
+      background: var(--deep-blue);
+      color: white;
+    }
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .entries-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .table-search {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .collapsible-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: 0.5rem 0;
+    }
+    .collapsible-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    .collapsible-content.expanded {
+      max-height: 500px;
+    }
+    .toggle-icon {
+      transition: transform 0.3s;
+    }
+    .toggle-icon.expanded {
+      transform: rotate(180deg);
+    }
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .modal-grid-item {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      background: #f8fafd;
+      border-radius: 0.75rem;
+      border: 1px solid #e2e8f0;
+    }
+    .modal-grid-title {
+      font-weight: 700;
+      color: var(--deep-blue);
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .modal-grid-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--deep-blue);
+      text-align: center;
+    }
+    .modal-grid-footer {
+      margin-top: 0.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+    .modal-table-container {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    .compact-table {
+      font-size: 0.85rem;
+    }
+    .compact-table th,
+    .compact-table td {
+      padding: 0.4rem 0.6rem;
+    }
+    .return-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      background: white;
+      border-radius: 0.5rem;
+      margin-bottom: 0.75rem;
+      transition: background 0.3s ease;
+      color: var(--black);
+    }
+    .return-item-info {
+      flex: 1;
+    }
+    .return-item-status {
+      margin-left: 1rem;
+    }
+    .return-item-checkbox {
+      margin-left: 1rem;
+    }
+    .checkin-form-group {
+      margin-bottom: 1.2rem;
+    }
+    .returned-items-list {
+      max-height: 200px;
+      overflow-y: auto;
+      margin: 1rem 0;
+      padding: 0.5rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      background: white;
+    }
+    .item-status-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .item-returned {
+      background-color: var(--returned-item);
+      border-left: 4px solid var(--success);
+    }
+    .item-pending {
+      background-color: var(--pending-return);
+      border-left: 4px solid var(--warning);
+    }
+    .search-container {
+      position: relative;
+      margin-bottom: 0.5rem;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--black);
+      border-radius: 0.6em;
+      font-size: 1rem;
+    }
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--deep-blue);
+    }
+    .item-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      background: white;
+    }
+    .item-option {
+      padding: 0.5rem;
+      cursor: pointer;
+      border-radius: 0.25rem;
+      transition: background 0.2s;
+      background-color: white;
+    }
+    .item-option:hover {
+      background: var(--light-accent);
+    }
+    .import-export-controls {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .import-btn, .export-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .import-btn input {
+      display: none;
+    }
+    .checkin-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .employee-detail-card {
+      background: white;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1rem;
+      border: 1px solid #e2e8f0;
+    }
+    .employee-detail-title {
+      font-weight: 700;
+      color: var(--deep-blue);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .employee-detail-row {
+      display: flex;
+      margin-bottom: 0.5rem;
+    }
+    .employee-detail-label {
+      font-weight: 600;
+      width: 120px;
+      color: #4b5563;
+    }
+    .employee-detail-value {
+      flex: 1;
+      color: var(--deep-blue);
+    }
+    /* New styles for enhanced visibility */
+    .key-item {
+      background-color: var(--key-selected);
+      border-left: 4px solid var(--key-color);
+    }
+    .card-item {
+      background-color: var(--card-selected);
+      border-left: 4px solid var(--card-color);
+    }
+    .returned-item {
+      background-color: var(--returned-item);
+      border-left: 4px solid var(--success);
+    }
+    .key-icon {
+      color: var(--key-color);
+    }
+    .card-icon {
+      color: var(--card-color);
+    }
+    .selected-item.key-item {
+      background-color: var(--key-selected);
+      border-left: 5px solid var(--key-color);
+    }
+    .selected-item.card-item {
+      background-color: var(--card-selected);
+      border-left: 5px solid var(--card-color);
+    }
+    .item-category {
+      font-size: 0.75rem;
+      color: #4b5563;
+      margin-top: 0.25rem;
+    }
+    .employee-photo {
+      width: 100px;
+      height: 100px;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      object-fit: cover;
+      margin-bottom: 0.5rem;
+    }
+    .photo-upload-btn {
+      background: var(--accent);
+      color: white;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .same-person-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: #f8fafd;
+      border-radius: 0.5rem;
+    }
+    .return-section {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #e2e8f0;
+    }
+    .return-section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--deep-blue);
+      margin-top: 0;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .overdue-download {
+      background: var(--warning);
+      color: white;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .overdue-download:hover {
+      background: #e0a800;
+    }
+    .dashboard-stat {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+      color: var(--deep-blue);
+    }
+    .dashboard-label {
+      font-size: 0.9rem;
+      color: var(--deep-blue);
+    }
+    .overdue-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .currently-taken-item {
+      padding: 0.75rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+    }
+    .currently-taken-item:last-child {
+      border-bottom: none;
+    }
+    .currently-taken-item-key {
+      background-color: rgba(59, 130, 246, 0.1);
+      border-left: 4px solid var(--key-color);
+    }
+    .currently-taken-item-card {
+      background-color: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid var(--card-color);
+    }
+    .item-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .item-badge-key {
+      background-color: var(--key-selected);
+      color: var(--key-color);
+    }
+    .item-badge-card {
+      background-color: var(--card-selected);
+      color: var(--card-color);
+    }
+    /* New item highlight */
+    .new-item-highlight {
+      background-color: var(--new-item);
+      animation: highlight 2s ease;
+    }
+    @keyframes highlight {
+      0% { background-color: var(--new-item); }
+      100% { background-color: white; }
+    }
+    /* Accessibility improvements */
+    button:focus, input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .rw-btn:focus {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+    }
+    [aria-hidden="true"] {
+      display: none;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+    
+    /* NEW: Section Headers for Checkout Items */
+    .items-section-header {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--deep-blue);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .items-section-header i {
+      font-size: 1.2rem;
+    }
+    
+    /* NEW: Entries Filter for Checkout */
+    .entries-filter {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .entries-filter label {
+      font-size: 0.9rem;
+      color: var(--deep-blue);
+      font-weight: 600;
+    }
+    
+    .entries-filter select {
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.35em;
+      border: 1px solid #cbd5e1;
+    }
+    
+    /* NEW: Table Headers for Management Sections */
+    .management-table-header {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--deep-blue);
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    @media (max-width: 900px) {
+      .rw-sidebar { width: 54px !important; min-width: 54px;}
+      .sidebar-btn { font-size: 1em; padding-left: 0.5em;}
+      .sidebar-section { font-size: 1em; padding-left: 0.2em;}
+      main {padding: 0.7rem !important;}
+      .section-title { font-size: 1.5rem; }
+      .grid-cols-5 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .overview-grid {
+        grid-template-columns: 1fr;
+      }
+      .modal-grid {
+        grid-template-columns: 1fr;
+      }
+      .checkin-form-grid {
+        grid-template-columns: 1fr;
+      }
+      .entries-filter {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+    @media (max-width: 600px) {
+      .rw-login-card { min-width: unset; padding: 1.3rem 0.6rem;}
+      .rw-login-title { font-size: 1.44rem;}
+      .rw-login-caption { font-size: 0.98rem;}
+      .content { padding: 0.6rem!important;}
+      .section-title { font-size: 1.35rem;}
+      .report-header { font-size: 1.23rem;}
+      .grid-cols-5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .grid-cols-3 {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+      }
+      .form-section {
+        padding: 0.75rem;
+      }
+      .table-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .import-export-controls {
+        flex-direction: column;
+      }
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    input, select, textarea { outline: none;}
+    .modal-title {
+      font-size: 1.5rem; font-weight: 700; color: var(--deep-blue);
+      margin-bottom: 1rem; text-align: center;
+    }
+    .modal-subtitle {
+      font-size: 1.1rem; color: var(--deep-blue); margin-bottom: 1.5rem;
+      text-align: center; font-weight: 600;
+    }
+    .dashboard-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--deep-blue);
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+    .dashboard-card-subtitle {
+      font-size: 0.75rem;
+      color: #4b5563;
+      text-align: center;
+    }
+    .overdue-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .overdue-table th {
+      background-color: var(--warning);
+      color: #fff;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    .overdue-table td {
+      padding: 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+    .overdue-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    /* Enhanced Contrast Styles */
+    .status-available {
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    .status-taken {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+    .status-overdue {
+      background-color: #fef9c3;
+      color: #a16207;
+      border: 1px solid #fef08a;
+    }
+    .status-pending {
+      background-color: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+    .status-partial {
+      background-color: #ffedd5;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
+    }
+    tr.unreturned {
+      background: #fff1f2 !important;
+      border-left: 5px solid var(--danger) !important;
+    }
+    .overdue-item {
+      background-color: #fffbeb;
+      border-left: 3px solid #fbbf24;
+      padding-left: 0.5rem;
+    }
+    .selected-item.key-item {
+      background-color: var(--key-selected);
+      border-left: 5px solid var(--key-color);
+    }
+    .selected-item.card-item {
+      background-color: var(--card-selected);
+      border-left: 5px solid var(--card-color);
+    }
+    .dashboard-card {
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+    .rw-sidebar {
+      background: #09122e;
+    }
+    .sidebar-btn:hover {
+      background: #1a2b5e;
+    }
+    
+    /* New search filters */
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .filter-label {
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+      color: var(--white);
+      font-weight: 600;
+    }
+    .item-search-results {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      background: white;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .search-result-item {
+      padding: 0.75rem;
+      cursor: pointer;
+      border-bottom: 1px solid #e2e8f0;
+      transition: background-color 0.2s;
+      color: var(--black);
+    }
+    .search-result-item:hover {
+      background-color: #f1f5f9;
+    }
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+    .item-quantity-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .item-summary-card {
+      background: #f8fafd;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-top: 1rem;
+      border: 1px solid #e2e8f0;
+    }
+    .item-summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .item-summary-title {
+      font-weight: 700;
+      color: var(--deep-blue);
+    }
+    .item-summary-details {
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+    
+    /* NEW: Improved contrast for issuer info */
+    .return-section label {
+      color: var(--deep-blue) !important;
+      font-weight: 600;
+    }
+    .return-section input {
+      color: var(--deep-blue) !important;
+    }
+  </style>
+</head>
+<body>
+<div id="toast"></div>
+<!-- Login Page -->
+<div id="loginPage">
+  <div class="rw-login-card">
+    <div class="flex flex-col items-center">
+      <div class="rd-logo">RD</div>
+      <div class="rw-login-title">Rosewood Doha</div>
+      <div class="rw-login-caption">Key &amp; Access Card Inventory</div>
+    </div>
+    <form id="loginForm" onsubmit="return handleLogin(event)" class="rw-login-form w-full flex flex-col gap-3">
+      <input type="text" id="username" placeholder="Username" required autocomplete="username" />
+      <input type="password" id="password" placeholder="Password" required autocomplete="current-password" />
+      <button type="submit" class="rw-login-btn">Sign In</button>
+      <div id="loginError" class="rw-login-error"></div>
+    </form>
+    <div class="text-xs text-[var(--deep-blue)] mt-2 font-serif opacity-90">© Rosewood Doha 2025</div>
+  </div>
+</div>
+<!-- Modal -->
+<div id="modal" class="fixed inset-0 z-50 modal-bg flex items-center justify-center hide">
+  <div class="bg-white rounded-lg shadow-lg max-w-4xl w-full p-6 relative" style="max-height:80vh;overflow-y:auto;">
+    <button onclick="hideModal()" class="absolute top-2 right-4 text-xl text-gray-700 hover:text-[var(--deep-blue)]" aria-label="Close modal">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+<!-- Main App -->
+<div id="mainApp" class="hide min-h-screen">
+  <nav class="rw-header px-6 py-3 flex justify-between items-center shadow relative z-10">
+    <div class="flex items-center gap-4">
+      <div class="rd-logo" style="width:40px;height:40px;font-size:1.5rem;">RD</div>
+      <span class="text-xl font-bold tracking-wide">Key & Access Card Inventory</span>
+    </div>
+    <div class="flex items-center gap-6">
+      <span id="currentUser" class="bg-[var(--white)] text-[var(--deep-blue)] px-3 py-1 rounded"></span>
+      <button onclick="logout()" class="rw-btn px-4 py-2 rounded">Logout</button>
+    </div>
+  </nav>
+  <div class="flex min-h-[calc(100vh-56px)]">
+    <aside class="rw-sidebar flex flex-col py-6 px-2 w-64 min-h-[calc(100vh-56px)] relative z-10">
+      <div class="sidebar-section">MENU</div>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded sidebar-active" data-page="dashboard" onclick="showPage('dashboard')"><span class="sidebar-icon"><i class="fa-solid fa-gauge"></i></span><span class="ml-2 hidden md:inline">Dashboard</span></button>
+      <div class="sidebar-section">ACTIVITY</div>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="checkout" onclick="showPage('checkout')"><span class="sidebar-icon"><i class="fa-solid fa-arrow-right-to-bracket"></i></span><span class="ml-2 hidden md:inline">Check Out</span></button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="checkin" onclick="showPage('checkin')"><span class="sidebar-icon"><i class="fa-solid fa-arrow-left"></i></span><span class="ml-2 hidden md:inline">Check In</span></button>
+      <div class="sidebar-section">REPORT</div>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="report" onclick="showPage('report')"><span class="sidebar-icon"><i class="fa-solid fa-file-lines"></i></span><span class="ml-2 hidden md:inline">Report</span></button>
+      <div class="sidebar-section">DATA</div>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="manage-emp" onclick="showPage('manage-emp')"><span class="sidebar-icon"><i class="fa-solid fa-user-plus"></i></span><span class="ml-2 hidden md:inline">Employees</span></button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="manage-key" onclick="showPage('manage-key')"><span class="sidebar-icon"><i class="fa-solid fa-key"></i></span><span class="ml-2 hidden md:inline">Keys</span></button>
+      <button class="sidebar-btn w-full text-left px-4 py-2 rounded" data-page="manage-card" onclick="showPage('manage-card')"><span class="sidebar-icon"><i class="fa-solid fa-id-card"></i></span><span class="ml-2 hidden md:inline">Access Cards</span></button>
+    </aside>
+    <main class="content flex-1 p-8 bg-transparent relative z-0">
+      <!-- DASHBOARD -->
+      <section id="page-dashboard" class="page-section">
+        <h2 class="section-title">Key &amp; Access Card Dashboard</h2>
+        
+        <div class="dashboard-grid-title">
+          <i class="fa-solid fa-chart-simple mr-2"></i> Summary Statistics
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-7">
+          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer dashboard-card" onclick="showDetailModal('employees')" title="View All Employees">
+            <div class="dashboard-card-content">
+              <div class="card-icon"><i class="fa-solid fa-users"></i></div>
+              <div class="dashboard-stat" id="statTotalEmployees">0</div>
+              <div class="dashboard-label">Employee Records</div>
+            </div>
+            <div class="dashboard-card-footer">
+              <span>Total Employees</span>
+              <button class="rw-btn text-xs">View All</button>
+            </div>
+          </div>
+          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer dashboard-card" onclick="showDetailModal('keys')" title="View All Keys">
+            <div class="dashboard-card-content">
+              <div class="card-icon"><i class="fa-solid fa-key"></i></div>
+              <div class="dashboard-stat" id="statTotalKeys">0</div>
+              <div class="dashboard-label">Keys Inventory</div>
+            </div>
+            <div class="dashboard-card-footer">
+              <span>Total Keys</span>
+              <button class="rw-btn text-xs">View All</button>
+            </div>
+          </div>
+          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer dashboard-card" onclick="showDetailModal('cards')" title="View All Cards">
+            <div class="dashboard-card-content">
+              <div class="card-icon"><i class="fa-solid fa-id-card"></i></div>
+              <div class="dashboard-stat" id="statTotalCards">0</div>
+              <div class="dashboard-label">Access Card Inventory</div>
+            </div>
+            <div class="dashboard-card-footer">
+              <span>Total Cards</span>
+              <button class="rw-btn text-xs">View All</button>
+            </div>
+          </div>
+          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer dashboard-card" onclick="showDetailModal('logs')" title="View Logs">
+            <div class="dashboard-card-content">
+              <div class="card-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+              <div class="dashboard-stat" id="statTotalLogs">0</div>
+              <div class="dashboard-label">Activity Logs</div>
+            </div>
+            <div class="dashboard-card-footer">
+              <span>All Activities</span>
+              <button class="rw-btn text-xs">View All</button>
+            </div>
+          </div>
+          <div class="rw-card card-anim rounded-xl p-5 flex flex-col items-center cursor-pointer dashboard-card" onclick="showDetailModal('taken')" title="View Currently Taken">
+            <div class="dashboard-card-content">
+              <div class="card-icon"><i class="fa-solid fa-list-check"></i></div>
+              <div class="dashboard-stat" id="statTaken">0</div>
+              <div class="dashboard-label">Items Currently Out</div>
+            </div>
+            <div class="dashboard-card-footer">
+              <span>Items out</span>
+              <button class="rw-btn text-xs">View All</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Overview Section -->
+        <div class="overview-grid">
+          <div class="overview-card">
+            <div class="collapsible-header" onclick="toggleCollapsible('overdueItems')">
+              <h3><i class="fa-solid fa-exclamation-circle text-[var(--warning)]"></i> Overdue Items</h3>
+              <i class="fa-solid fa-chevron-down toggle-icon" id="overdueItemsIcon"></i>
+            </div>
+            <div class="collapsible-content" id="overdueItemsContent">
+              <div class="overdue-controls">
+                <span class="text-sm">Items not returned within 12 hours</span>
+                <button class="overdue-download" onclick="downloadOverduePDFReport()">
+                  <i class="fa-solid fa-file-pdf mr-1"></i> Download PDF
+                </button>
+              </div>
+              <div class="table-container">
+                <table class="overdue-table">
+                  <thead>
+                    <tr>
+                      <th>Employee</th>
+                      <th>ID</th>
+                      <th>Phone</th>
+                      <th>Item</th>
+                      <th>Time Taken</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="overdueItemsList">
+                    <tr><td colspan="6">Loading overdue items...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination" id="overduePagination"></div>
+            </div>
+          </div>
+          <div class="overview-card">
+            <div class="collapsible-header" onclick="toggleCollapsible('recentActivity')">
+              <h3><i class="fa-solid fa-user-clock text-[var(--info)]"></i> Recent Activity</h3>
+              <i class="fa-solid fa-chevron-down toggle-icon" id="recentActivityIcon"></i>
+            </div>
+            <div class="collapsible-content" id="recentActivityContent">
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr class="table-head">
+                      <th>Activity</th>
+                      <th>Employee</th>
+                      <th>Phone</th>
+                      <th>Item</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recentActivityList">
+                    <tr><td colspan="5">Loading recent activity...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination" id="activityPagination"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="rounded-xl rw-card p-6 mb-10 shadow">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <h3 class="font-semibold text-lg" style="color:var(--deep-blue)">Key & Card Activity</h3>
+              <p class="text-sm text-gray-600">Check-out and check-in activity over time</p>
+            </div>
+            <select id="dashboardRange" class="border rounded px-2 py-1 text-xs" onchange="renderChart()">
+              <option value="7">Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+            </select>
+          </div>
+          <div style="height:260px;">
+            <canvas id="activityChart" height="60"></canvas>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-color" style="background: #0a1433;"></div>
+              <span>Check Out</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: #111;"></div>
+              <span>Check In</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- CHECK OUT -->
+      <section id="page-checkout" class="hide page-section">
+        <h2 class="section-title">Check Out Items</h2>
+        <p class="text-sm text-white mb-5 opacity-80">Record when keys or access cards are issued to employees</p>
+        
+        <form id="checkoutForm" class="mb-6" onsubmit="return handleCheckOut(event)">
+          <div class="form-section">
+            <h3 class="form-section-title"><i class="fa-solid fa-user"></i> Employee Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-group">
+                <label for="checkoutEmpId" class="required">Employee Number</label>
+                <input type="text" name="employee_id" id="checkoutEmpId" class="form-input" placeholder="Enter employee ID" required oninput="autofillCheckout(this.value)" />
+                <span class="input-hint">Enter 3-10 alphanumeric characters</span>
+                <div class="autofill-notice">If employee exists, details will auto-fill</div>
+              </div>
+              <div class="form-group">
+                <label for="checkoutName" class="required">Full Name</label>
+                <input type="text" name="name" id="checkoutName" class="form-input" placeholder="Enter employee's full name" required />
+              </div>
+              <div class="form-group">
+                <label for="checkoutPhone" class="required">Phone Number</label>
+                <input type="tel" name="phone" id="checkoutPhone" class="form-input" placeholder="Enter phone number" required />
+              </div>
+              <div class="form-group">
+                <label for="checkoutDept" class="required">Department</label>
+                <input type="text" name="department" id="checkoutDept" class="form-input" placeholder="Enter department" required />
+              </div>
+              <div class="form-group">
+                <label for="checkoutPosition">Position</label>
+                <input type="text" name="position" id="checkoutPosition" class="form-input" placeholder="Enter position" />
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h3 class="form-section-title"><i class="fa-solid fa-key"></i> Item Selection</h3>
+            
+            <div class="filter-grid">
+              <!-- Keys Section -->
+              <div class="filter-group">
+                <div class="items-section-header">
+                  <i class="fa-solid fa-key key-icon"></i>
+                  <span>Keys</span>
+                </div>
+                
+                <div class="entries-filter">
+                  <label for="keyEntriesFilter">Show</label>
+                  <select id="keyEntriesFilter" class="form-input" onchange="filterKeySearchResults()">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                  </select>
+                  <span>entries</span>
+                </div>
+                
+                <input type="text" id="keySearch" class="form-input" placeholder="Search by number, floor, description..." oninput="searchItems('key')">
+                <div id="keyResults" class="item-search-results"></div>
+              </div>
+              
+              <!-- Access Cards Section -->
+              <div class="filter-group">
+                <div class="items-section-header">
+                  <i class="fa-solid fa-id-card card-icon"></i>
+                  <span>Access Cards</span>
+                </div>
+                
+                <div class="entries-filter">
+                  <label for="cardEntriesFilter">Show</label>
+                  <select id="cardEntriesFilter" class="form-input" onchange="filterCardSearchResults()">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                  </select>
+                  <span>entries</span>
+                </div>
+                
+                <input type="text" id="cardSearch" class="form-input" placeholder="Search by name, category..." oninput="searchItems('card')">
+                <div id="cardResults" class="item-search-results"></div>
+              </div>
+            </div>
+            
+            <div class="item-summary-card">
+              <div class="item-summary-header">
+                <div class="item-summary-title">Selected Items</div>
+                <button type="button" class="rw-btn text-xs" onclick="clearSelectedItems()">Clear All</button>
+              </div>
+              <div id="selectedItemsList" class="selected-items-container">
+                <p class="text-center text-gray-500">No items selected yet</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h3 class="form-section-title"><i class="fa-solid fa-user-check"></i> Issuer Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-group">
+                <label for="checkoutIssuedBy" class="required">Issued By</label>
+                <input type="text" name="issued_by" id="checkoutIssuedBy" class="form-input" placeholder="Enter issuer name" required />
+              </div>
+              <div class="form-group">
+                <label for="checkoutTime">Time</label>
+                <input type="text" name="time_taken" id="checkoutTime" class="form-input" readonly />
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group md:col-span-2 mt-6">
+            <button type="submit" class="rw-btn checkout-btn px-4 py-2 rounded w-full text-lg">
+              <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i> Check Out Items
+            </button>
+          </div>
+        </form>
+        <div class="text-xs" style="color:var(--deep-blue)">Employee will be automatically added if not found in the system.</div>
+      </section>
+      
+      <!-- CHECK IN -->
+      <section id="page-checkin" class="hide page-section">
+        <h2 class="section-title">Check In Items</h2>
+        <p class="text-sm text-white mb-5 opacity-80">Return keys or access cards that were checked out</p>
+        
+        <div class="rw-card mb-6 p-5">
+          <h3 class="management-table-header">
+            <i class="fa-solid fa-list-check mr-2"></i> Check-in List
+          </h3>
+          
+          <div class="rw-table-controls">
+            <input type="text" id="checkinSearch" placeholder="Search by employee or item..." class="form-input" style="width: 300px;" oninput="filterCheckinTable()">
+            <button class="rw-btn px-3 py-1 rounded" onclick="filterCheckinTable()">Search</button>
+          </div>
+          <div class="table-container">
+            <div class="scroll-table">
+              <table class="w-full">
+                <thead>
+                  <tr class="table-head">
+                    <th>Record ID</th>
+                    <th>Employee</th>
+                    <th>Phone</th>
+                    <th>Items</th>
+                    <th>Time Taken</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="checkinTable">
+                  <tr><td colspan="7">Loading checked out items...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- REPORT -->
+      <section id="page-report" class="hide page-section">
+        <div class="report-header">Rosewood Hotel</div>
+        <div class="report-subtitle">Security Access Report</div>
+        <div class="report-range" id="reportSubheading"></div>
+        
+        <div class="rw-card mb-6 p-5">
+          <h3 class="management-table-header">
+            <i class="fa-solid fa-file-lines mr-2"></i> Access Report
+          </h3>
+          
+          <div class="rw-table-controls">
+            <label for="reportFrom" class="text-xs font-semibold">From:</label>
+            <input type="date" id="reportFrom" />
+            <label for="reportTo" class="text-xs font-semibold">To:</label>
+            <input type="date" id="reportTo" />
+            <button onclick="renderReport();return false;" class="rw-btn px-3 py-1 rounded text-xs">Apply Filter</button>
+            <button onclick="clearReportFilters()" class="rw-btn px-3 py-1 rounded text-xs" style="background:var(--danger);color:var(--white)">Clear Filters</button>
+            <button onclick="downloadPDFReport();" class="rw-btn px-3 py-1 rounded text-xs" style="background:var(--deep-blue);color:var(--white)">Download PDF</button>
+            <button onclick="downloadExcelReport();" class="rw-btn px-3 py-1 rounded text-xs" style="background:var(--success);color:var(--white)">Download Excel</button>
+            <label for="entriesPerPage" class="text-xs font-semibold ml-4">Show</label>
+            <select id="entriesPerPage" onchange="renderReport()">
+              <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option>
+            </select>
+            <span class="text-xs font-semibold">entries</span>
+          </div>
+          <div class="table-container">
+            <div class="scroll-table"><table class="w-full text-xs">
+              <thead>
+                <tr class="table-head">
+                  <th>Key Number</th><th>Room Description</th><th>Issued To</th><th>Issued By</th><th>Time Taken</th><th>Status</th><th>Returned By</th><th>Received By</th><th>Time Brought</th><th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody id="reportTable"></tbody>
+            </table></div>
+          </div>
+          <div id="reportPagination" class="flex gap-3 mt-2"></div>
+        </div>
+      </section>
+      
+      <!-- EMPLOYEE MANAGEMENT -->
+      <section id="page-manage-emp" class="hide page-section">
+        <h2 class="section-title">Employee Management</h2>
+        <p class="text-sm text-white mb-5 opacity-80">Manage employee records who can access keys and cards</p>
+        
+        <div class="rw-card mb-4 p-5">
+          <h3 class="category-title">Add New Employee</h3>
+          <form id="employeeForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" onsubmit="return addEmployee(event)">
+            <div class="form-group">
+              <label for="empId" class="required">Employee Number</label>
+              <input type="text" class="form-input" placeholder="Enter employee ID" id="empId" required>
+              <span class="input-hint">Unique employee identifier</span>
+            </div>
+            <div class="form-group">
+              <label for="empName" class="required">Full Name</label>
+              <input type="text" class="form-input" placeholder="Enter full name" id="empName" required>
+            </div>
+            <div class="form-group">
+              <label for="empDept" class="required">Department</label>
+              <input type="text" class="form-input" placeholder="Enter department" id="empDept" required>
+            </div>
+            <div class="form-group">
+              <label for="empPosition">Position</label>
+              <input type="text" class="form-input" placeholder="Enter position" id="empPosition">
+            </div>
+            <div class="form-group">
+              <label for="empPhone">Phone Number</label>
+              <input type="tel" class="form-input" placeholder="Enter phone number" id="empPhone">
+            </div>
+            <div class="form-group">
+              <label>Employee Photo</label>
+              <img id="empPhotoPreview" class="employee-photo" src="https://via.placeholder.com/100" alt="Employee Photo">
+              <label class="photo-upload-btn">
+                <i class="fa-solid fa-camera mr-2"></i> Upload Photo
+                <input type="file" id="empPhoto" accept="image/*" style="display: none;" onchange="previewEmpPhoto(event)">
+              </label>
+            </div>
+            <div class="form-group md:col-span-2">
+              <button type="submit" class="rw-btn px-4 py-2 rounded w-full">Add Employee</button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="rw-card p-5">
+          <h3 class="management-table-header">
+            <i class="fa-solid fa-users mr-2"></i> Employee Records
+          </h3>
+          
+          <div class="table-controls">
+            <div class="table-search">
+              <input type="text" id="employeeSearch" placeholder="Search employees..." class="form-input" style="width: 250px;" oninput="filterEmployeeTable()">
+              <i class="fa-solid fa-search text-gray-500"></i>
+            </div>
+            <div class="entries-control">
+              <label for="employeeEntries">Show</label>
+              <select id="employeeEntries" class="form-input" style="width: 80px;" onchange="filterEmployeeTable()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span>entries</span>
+            </div>
+          </div>
+          <div class="table-container">
+            <div class="rw-card max-h-72 overflow-y-auto p-4"><table class="w-full text-xs">
+              <thead><tr class="bg-gray-100 text-black table-head">
+                <th>Employee Number</th><th>Name</th><th>Phone Number</th><th>Department</th><th>Position</th><th>Action</th>
+              </tr></thead>
+              <tbody id="employeeTable"></tbody>
+            </table></div>
+          </div>
+          <div id="employeePagination" class="pagination mt-4"></div>
+          
+          <div class="import-export-controls">
+            <button class="rw-btn export-btn px-3 py-2 rounded" onclick="exportEmployees()">
+              <i class="fa-solid fa-file-export mr-2"></i> Export Employees
+            </button>
+            <label class="rw-btn import-btn px-3 py-2 rounded cursor-pointer">
+              <i class="fa-solid fa-file-import mr-2"></i> Import Employees
+              <input type="file" id="importEmployeeFile" accept=".csv" onchange="importEmployees(this.files)" style="display: none;">
+            </label>
+          </div>
+        </div>
+      </section>
+      
+      <!-- KEY MANAGEMENT -->
+      <section id="page-manage-key" class="hide page-section">
+        <h2 class="section-title">Key Management</h2>
+        <p class="text-sm text-white mb-5 opacity-80">Manage physical keys and their information</p>
+        
+        <div class="rw-card mb-4 p-5">
+          <h3 class="category-title">Add New Key</h3>
+          <form id="keyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" onsubmit="return addKey(event)">
+            <div class="form-group">
+              <label for="keyNum" class="required">Key Number</label>
+              <input type="text" class="form-input" placeholder="Enter key number" id="keyNum" required>
+            </div>
+            <div class="form-group">
+              <label for="keyRoomDesc">Room Description</label>
+              <input type="text" class="form-input" placeholder="Enter room description" id="keyRoomDesc">
+            </div>
+            <div class="form-group">
+              <label for="keyFloor">Floor</label>
+              <input type="text" class="form-input" placeholder="Enter floor number" id="keyFloor">
+            </div>
+            <div class="form-group">
+              <label for="keyCategory">Category</label>
+              <select id="keyCategory" class="form-input">
+                <option value="Room">Room Key</option>
+                <option value="Master">Master Key</option>
+                <option value="Storage">Storage Key</option>
+                <option value="Emergency">Emergency Key</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="keyRemarks">Remarks</label>
+              <input type="text" class="form-input" placeholder="Enter remarks" id="keyRemarks">
+            </div>
+            <div class="form-group md:col-span-2">
+              <button type="submit" class="rw-btn px-4 py-2 rounded w-full">Add Key</button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="rw-card p-5">
+          <h3 class="management-table-header">
+            <i class="fa-solid fa-key mr-2"></i> Key Inventory
+          </h3>
+          
+          <div class="table-controls">
+            <div class="table-search">
+              <input type="text" id="keySearch" placeholder="Search keys..." class="form-input" style="width: 250px;" oninput="filterKeyTable()">
+              <i class="fa-solid fa-search text-gray-500"></i>
+            </div>
+            <div class="entries-control">
+              <label for="keyEntries">Show</label>
+              <select id="keyEntries" class="form-input" style="width: 80px;" onchange="filterKeyTable()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span>entries</span>
+            </div>
+          </div>
+          <div class="table-container">
+            <div class="rw-card max-h-72 overflow-y-auto p-4"><table class="w-full text-xs">
+              <thead><tr class="bg-gray-100 text-black table-head">
+                <th>Number</th><th>Floor</th><th>Description</th><th>Key Code</th><th>Status</th><th>Action</th>
+              </tr></thead>
+              <tbody id="keyTable"></tbody>
+            </table></div>
+          </div>
+          <div id="keyPagination" class="pagination mt-4"></div>
+          
+          <div class="import-export-controls">
+            <button class="rw-btn export-btn px-3 py-2 rounded" onclick="exportKeys()">
+              <i class="fa-solid fa-file-export mr-2"></i> Export Keys
+            </button>
+            <label class="rw-btn import-btn px-3 py-2 rounded cursor-pointer">
+              <i class="fa-solid fa-file-import mr-2"></i> Import Keys
+              <input type="file" id="importKeyFile" accept=".csv" onchange="importKeys(this.files)" style="display: none;">
+            </label>
+          </div>
+        </div>
+      </section>
+      
+      <!-- CARD MANAGEMENT -->
+      <section id="page-manage-card" class="hide page-section">
+        <h2 class="section-title">Access Card Management</h2>
+        <p class="text-sm text-white mb-5 opacity-80">Manage electronic access cards</p>
+        
+        <div class="rw-card mb-4 p-5">
+          <h3 class="category-title">Add New Card</h3>
+          <form id="cardForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" onsubmit="return addCard(event)">
+            <div class="form-group">
+              <label for="cardNumber" class="required">Card Number</label>
+              <input type="text" class="form-input" placeholder="Enter card number" id="cardNumber" required>
+            </div>
+            <div class="form-group">
+              <label for="cardCategory">Category</label>
+              <select id="cardCategory" class="form-input">
+                <option value="Schneider">Schneider Card</option>
+                <option value="Salto">Salto Card</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cardDesc">Description</label>
+              <input type="text" class="form-input" placeholder="Enter description" id="cardDesc">
+            </div>
+            <div class="form-group md:col-span-2">
+              <button type="submit" class="rw-btn px-4 py-2 rounded w-full">Add Card</button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="rw-card p-5">
+          <h3 class="management-table-header">
+            <i class="fa-solid fa-id-card mr-2"></i> Access Card Inventory
+          </h3>
+          
+          <div class="table-controls">
+            <div class="table-search">
+              <input type="text" id="cardSearch" placeholder="Search cards..." class="form-input" style="width: 250px;" oninput="filterCardTable()">
+              <i class="fa-solid fa-search text-gray-500"></i>
+            </div>
+            <div class="entries-control">
+              <label for="cardEntries">Show</label>
+              <select id="cardEntries" class="form-input" style="width: 80px;" onchange="filterCardTable()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span>entries</span>
+            </div>
+          </div>
+          <div class="table-container">
+            <div class="rw-card max-h-72 overflow-y-auto p-4"><table class="w-full text-xs">
+              <thead><tr class="bg-gray-100 text-black table-head">
+                <th>Number</th><th>Type</th><th>Description</th><th>Status</th><th>Action</th>
+              </tr></thead>
+              <tbody id="cardTable"></tbody>
+            </table></div>
+          </div>
+          <div id="cardPagination" class="pagination mt-4"></div>
+          
+          <div class="import-export-controls">
+            <button class="rw-btn export-btn px-3 py-2 rounded" onclick="exportCards()">
+              <i class="fa-solid fa-file-export mr-2"></i> Export Cards
+            </button>
+            <label class="rw-btn import-btn px-3 py-2 rounded cursor-pointer">
+              <i class="fa-solid fa-file-import mr-2"></i> Import Cards
+              <input type="file" id="importCardFile" accept=".csv" onchange="importCards(this.files)" style="display: none;">
+            </label>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<script>
+// Performance optimization variables
+let employeeMap = new Map();
+let keyMap = new Map();
+let cardMap = new Map();
+let logMap = new Map();
+
+// --- Data ---
+let employees = JSON.parse(localStorage.getItem('employees')||'[]');
+let keys = JSON.parse(localStorage.getItem('keys')||'[]');
+let cards = JSON.parse(localStorage.getItem('cards')||'[]');
+let logs = JSON.parse(localStorage.getItem('logs')||'[]');
+let accessHistory = JSON.parse(localStorage.getItem('accessHistory')||'[]');
+
+// Initialize with sample data if empty
+if (employees.length === 0) {
+  employees = [
+    { id: 'EMP001', name: 'John Smith', department: 'Housekeeping', position: 'Supervisor', phone: '555-1234' },
+    { id: 'EMP002', name: 'Sarah Johnson', department: 'Security', position: 'Officer', phone: '555-5678' },
+    { id: 'EMP003', name: 'Michael Brown', department: 'Maintenance', position: 'Technician', phone: '555-9012' },
+    { id: 'EMP004', name: 'Emily Davis', department: 'Front Desk', position: 'Manager', phone: '555-3456' },
+    { id: 'EMP005', name: 'Robert Wilson', department: 'Management', position: 'Director', phone: '555-7890' }
+  ];
+  localStorage.setItem('employees', JSON.stringify(employees));
+}
+
+if (keys.length === 0) {
+  keys = [
+    { id: 'KEY001', num: 'K001', room: 'Main Entrance', floor: 'Ground', category: 'Master', remarks: 'Master Key', status: 'Available' },
+    { id: 'KEY002', num: 'K002', room: 'Executive Suite', floor: '5th', category: 'Room', remarks: 'VIP Access', status: 'Available' },
+    { id: 'KEY003', num: 'K003', room: 'Storage Room', floor: 'Basement', category: 'Storage', remarks: 'Restricted', status: 'Available' },
+    { id: 'KEY004', num: 'K004', room: 'Pool Area', floor: 'Garden', category: 'Emergency', remarks: 'Outdoor', status: 'Available' },
+    { id: 'KEY005', num: 'K005', room: 'Spa', floor: '3rd', category: 'Room', remarks: 'Wellness Area', status: 'Available' }
+  ];
+  localStorage.setItem('keys', JSON.stringify(keys));
+}
+
+if (cards.length === 0) {
+  cards = [
+    { id: 'CARD001', number: 'C001', category: 'Schneider', desc: 'Front Desk Access', status: 'Available' },
+    { id: 'CARD002', number: 'C002', category: 'Salto', desc: 'Management Access', status: 'Available' },
+    { id: 'CARD003', number: 'C003', category: 'Schneider', desc: 'Maintenance Access', status: 'Available' },
+    { id: 'CARD004', number: 'C004', category: 'Salto', desc: 'Housekeeping Access', status: 'Available' },
+    { id: 'CARD005', number: 'C005', category: 'Schneider', desc: 'VIP Access', status: 'Available' }
+  ];
+  localStorage.setItem('cards', JSON.stringify(cards));
+}
+
+if (accessHistory.length === 0) {
+  accessHistory = [
+    { 
+      id: 'LOG001',
+      employee_id: 'EMP001', 
+      name: 'John Smith', 
+      phone: '555-1234', 
+      department: 'Housekeeping',
+      position: 'Supervisor',
+      key_taken: 'K001', 
+      key_id: 'KEY001',
+      key_quantity: 1,
+      access_card_taken: 'C001',
+      card_id: 'CARD001',
+      card_quantity: 1,
+      issued_by: 'Admin', 
+      time_taken: '2025-05-28 09:15:00',
+      returned_by: 'John Smith',
+      receiver: 'Security Desk',
+      time_brought: '2025-05-28 17:30:00',
+      remarks: 'Returned on time',
+      items_returned: [
+        { type: 'key', id: 'KEY001', returned: true },
+        { type: 'card', id: 'CARD001', returned: true }
+      ],
+      status: 'Returned'
+    },
+    { 
+      id: 'LOG002',
+      employee_id: 'EMP002', 
+      name: 'Sarah Johnson', 
+      phone: '555-5678', 
+      department: 'Security',
+      position: 'Officer',
+      key_taken: 'K002', 
+      key_id: 'KEY002',
+      key_quantity: 1,
+      access_card_taken: 'C005',
+      card_id: 'CARD005',
+      card_quantity: 1,
+      issued_by: 'Admin', 
+      time_taken: '2025-05-29 14:00:00',
+      returned_by: '',
+      receiver: '',
+      time_brought: '',
+      remarks: '',
+      items_returned: [
+        { type: 'key', id: 'KEY002', returned: false },
+        { type: 'card', id: 'CARD005', returned: false }
+      ],
+      status: 'Taken'
+    },
+    { 
+      id: 'LOG003',
+      employee_id: 'EMP003', 
+      name: 'Michael Brown', 
+      phone: '555-9012', 
+      department: 'Maintenance',
+      position: 'Technician',
+      key_taken: 'K003', 
+      key_id: 'KEY003',
+      key_quantity: 2,
+      access_card_taken: 'C003',
+      card_id: 'CARD003',
+      card_quantity: 1,
+      issued_by: 'Admin', 
+      time_taken: '2025-05-30 08:45:00',
+      returned_by: 'Michael Brown',
+      receiver: 'Security Desk',
+      time_brought: '2025-05-30 16:30:00',
+      remarks: 'Key returned slightly damaged',
+      items_returned: [
+        { type: 'key', id: 'KEY003', returned: true },
+        { type: 'card', id: 'CARD003', returned: true }
+      ],
+      status: 'Returned'
+    }
+  ];
+  localStorage.setItem('accessHistory', JSON.stringify(accessHistory));
+}
+
+// Initialize maps for performance
+function initializeMaps() {
+  employeeMap.clear();
+  employees.forEach(emp => employeeMap.set(emp.id, emp));
+  
+  keyMap.clear();
+  keys.forEach(key => keyMap.set(key.id, key));
+  
+  cardMap.clear();
+  cards.forEach(card => cardMap.set(card.id, card));
+  
+  logMap.clear();
+  logs.forEach(log => logMap.set(log.id, log));
+}
+
+// Initialize maps on page load
+initializeMaps();
+
+// Toast
+function showToast(msg, ms=2400) {
+  let t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(()=>{t.style.display='none';}, ms);
+}
+
+// Toggle collapsible sections
+function toggleCollapsible(id) {
+  const content = document.getElementById(`${id}Content`);
+  const icon = document.getElementById(`${id}Icon`);
+  
+  if (content.classList.contains('expanded')) {
+    content.classList.remove('expanded');
+    icon.classList.remove('expanded');
+  } else {
+    content.classList.add('expanded');
+    icon.classList.add('expanded');
+  }
+}
+
+// --- Login ---
+function handleLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  if (username === 'RWDHA' && password === 'rwdha@2025') {
+    document.getElementById('loginPage').classList.add('hide');
+    document.getElementById('mainApp').classList.remove('hide');
+    document.getElementById('currentUser').textContent = username;
+    showPage('dashboard');
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginError').textContent = 'Incorrect username or password!';
+  }
+  return false;
+}
+function logout() {
+  document.getElementById('loginPage').classList.remove('hide');
+  document.getElementById('mainApp').classList.add('hide');
+  document.getElementById('loginForm').reset();
+  document.getElementById('loginError').style.display = 'none';
+}
+
+// --- Sidebar navigation ---
+function showPage(page) {
+  document.querySelectorAll('main > section').forEach(el => el.classList.add('hide'));
+  document.querySelectorAll('.sidebar-btn').forEach(btn => btn.classList.remove('sidebar-active'));
+  document.querySelector(`[data-page="${page}"]`).classList.add('sidebar-active');
+  document.getElementById(`page-${page}`).classList.remove('hide');
+  if(page === 'dashboard') renderDashboard();
+  if(page === 'report') renderReport();
+  if(page === 'manage-emp') renderEmployeeTable();
+  if(page === 'manage-key') renderKeyTable();
+  if(page === 'manage-card') renderCardTable();
+  if(page === 'checkout') renderCheckOutSection();
+  if(page === 'checkin') renderCheckinTable();
+}
+
+// --- Dashboard Counters ---
+function animateCounter(id, target) {
+  let el = document.getElementById(id);
+  let curr = parseInt(el.textContent)||0;
+  let step = Math.ceil(Math.abs(target-curr)/18)||1;
+  if(curr === target) return;
+  let dir = target>curr?1:-1;
+  let i=curr;
+  let interval = setInterval(()=>{
+    i+=step*dir;
+    if((dir>0&&i>=target)||(dir<0&&i<=target)) {el.textContent=target; clearInterval(interval);}
+    else el.textContent=i;
+  }, 24);
+}
+function renderDashboard() {
+  animateCounter('statTotalEmployees', employees.length);
+  animateCounter('statTotalKeys', keys.length);
+  animateCounter('statTotalCards', cards.length);
+  animateCounter('statTotalLogs', logs.length);
+  
+  // Calculate taken items - now counts individual items
+  let totalItemsOut = 0;
+  accessHistory.forEach(record => {
+    record.items_returned.forEach(item => {
+      if (!item.returned) totalItemsOut++;
+    });
+  });
+  animateCounter('statTaken', totalItemsOut);
+  
+  renderChart();
+  renderOverviewCards();
+}
+
+// Render overview cards
+function renderOverviewCards() {
+  // Overdue items
+  const overdueItems = accessHistory.filter(a => 
+    !a.items_returned.every(item => item.returned) && 
+    isOver12Hours(a.time_taken)
+  );
+  const overdueList = document.getElementById('overdueItemsList');
+  
+  if (overdueItems.length === 0) {
+    overdueList.innerHTML = '<tr><td colspan="6">No overdue items</td></tr>';
+  } else {
+    overdueList.innerHTML = '';
+    overdueItems.slice(0, 5).forEach(item => {
+      const tr = document.createElement('tr');
+      tr.classList.add('overdue-item');
+      tr.innerHTML = `
+        <td>${item.name||''}</td>
+        <td>${item.employee_id||''}</td>
+        <td>${item.phone||''}</td>
+        <td>${item.key_taken ? 'Key: ' + item.key_taken : ''} ${item.access_card_taken ? 'Card: ' + item.access_card_taken : ''}</td>
+        <td>${item.time_taken||''}</td>
+        <td><span class="status-badge status-overdue">OVERDUE</span></td>
+      `;
+      overdueList.appendChild(tr);
+    });
+  }
+  
+  // Recent activity
+  const recentActivityList = document.getElementById('recentActivityList');
+  const sortedLogs = [...logs].sort((a, b) => new Date(b.time) - new Date(a.time));
+  
+  if (sortedLogs.length === 0) {
+    recentActivityList.innerHTML = '<tr><td colspan="5">No recent activity</td></tr>';
+  } else {
+    recentActivityList.innerHTML = '';
+    sortedLogs.slice(0, 5).forEach(log => {
+      const tr = document.createElement('tr');
+      const date = new Date(log.time).toLocaleString();
+      tr.innerHTML = `
+        <td>${log.type === 'checkout' ? 'Check Out' : 'Check In'}</td>
+        <td>${log.name||''}</td>
+        <td>${log.phone||''}</td>
+        <td>${log.key_taken||''} ${log.access_card_taken||''}</td>
+        <td>${date}</td>
+      `;
+      recentActivityList.appendChild(tr);
+    });
+  }
+}
+
+// --- Chart ---
+function renderChart() {
+  let range = 7;
+  try{range = parseInt(document.getElementById('dashboardRange').value, 10);}catch{}
+  let labels = Array(range).fill(0).map((_,i)=>{let d=new Date(); d.setDate(d.getDate()-i); return d.toLocaleDateString();}).reverse();
+  let checkinData = labels.map(lbl=> logs.filter(l=>(new Date(l.time)).toLocaleDateString()===lbl&&l.type==='checkin').length );
+  let checkoutData = labels.map(lbl=> logs.filter(l=>(new Date(l.time)).toLocaleDateString()===lbl&&l.type==='checkout').length );
+  let ctx = document.getElementById('activityChart').getContext('2d');
+  if(window.activityChartInstance) window.activityChartInstance.destroy();
+  window.activityChartInstance = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels:labels,
+      datasets:[
+        {label:'Check Out',data:checkinData,borderColor:"#0a1433",backgroundColor:"rgba(10,20,51,0.09)",tension:0.3},
+        {label:'Check In',data:checkoutData,borderColor:"#111",backgroundColor:"rgba(17,17,17,0.09)",tension:0.3}
+      ]
+    },
+    options:{
+      plugins:{legend:{display:true,labels:{color:'#0a1433'}}},
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      scales:{
+        x:{
+          grid: {display: false, drawBorder: false},
+          ticks:{color:'#0a1433'}
+        },
+        y:{
+          grid: {display: false, drawBorder: false},
+          beginAtZero:true,
+          ticks:{color:'#0a1433'}
+        }
+      }
+    }
+  });
+}
+
+// --- Detail Modal (Dashboard counters etc) ---
+function showDetailModal(type) {
+  let modal = document.getElementById('modal');
+  let content = '';
+  
+  if(type === 'employees') {
+    content = `<div class="modal-title">Employee Records</div>
+      <div class="modal-subtitle">All registered employees</div>
+      <div class="modal-grid">
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Total Employees</div>
+          <div class="modal-grid-value">${employees.length}</div>
+          <div class="modal-grid-footer">Active in the system</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Housekeeping</div>
+          <div class="modal-grid-value">${employees.filter(e => e.department === 'Housekeeping').length}</div>
+          <div class="modal-grid-footer">Department employees</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Security</div>
+          <div class="modal-grid-value">${employees.filter(e => e.department === 'Security').length}</div>
+          <div class="modal-grid-footer">Department employees</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Management</div>
+          <div class="modal-grid-value">${employees.filter(e => e.department === 'Management').length}</div>
+          <div class="modal-grid-footer">Department employees</div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <input class="border rounded px-2 py-1 mb-2 w-full" placeholder="Search employees..." oninput="filterTable('modalEmpTable', this.value)">
+        <div class="modal-table-container"><table class="w-full text-xs compact-table">
+        <thead><tr class="table-head">
+          <th>Employee Number</th><th>Name</th><th>Phone Number</th><th>Department</th><th>Position</th>
+        </tr></thead>
+        <tbody id="modalEmpTable">
+        ${employees.map(emp=>`<tr><td>${emp.id}</td><td>${emp.name}</td><td>${emp.phone||''}</td><td>${emp.department}</td><td>${emp.position||''}</td></tr>`).join('')}
+        </tbody></table></div>
+      </div>`;
+  } else if(type === 'keys') {
+    content = `<div class="modal-title">Key Inventory</div>
+      <div class="modal-subtitle">All keys in the system</div>
+      <div class="modal-grid">
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Total Keys</div>
+          <div class="modal-grid-value">${keys.length}</div>
+          <div class="modal-grid-footer">Physical keys</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Available</div>
+          <div class="modal-grid-value">${keys.filter(k => 
+            !accessHistory.some(a => a.key_taken === k.num && 
+            !a.items_returned.find(i => i.type === 'key' && i.id === k.id && i.returned))
+          ).length}</div>
+          <div class="modal-grid-footer">Ready for checkout</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Taken</div>
+          <div class="modal-grid-value">${keys.filter(k => 
+            accessHistory.some(a => a.key_taken === k.num && 
+            !a.items_returned.find(i => i.type === 'key' && i.id === k.id && i.returned))
+          ).length}</div>
+          <div class="modal-grid-footer">Currently checked out</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Overdue</div>
+          <div class="modal-grid-value">${keys.filter(k => {
+            const log = accessHistory.find(a => 
+              a.key_taken === k.num && 
+              !a.items_returned.find(i => i.type === 'key' && i.id === k.id && i.returned) &&
+              isOver12Hours(a.time_taken)
+            );
+            return !!log;
+          }).length}</div>
+          <div class="modal-grid-footer">Not returned on time</div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <input class="border rounded px-2 py-1 mb-2 w-full" placeholder="Search keys..." oninput="filterTable('modalKeyTable', this.value)">
+        <div class="modal-table-container"><table class="w-full text-xs compact-table">
+        <thead><tr class="table-head">
+          <th>Key Number</th><th>Description</th><th>Category</th><th>Floor</th><th>Remarks</th><th>Status</th>
+        </tr></thead>
+        <tbody id="modalKeyTable">
+        ${keys.map(k=>{
+          let checkedOut = accessHistory.find(a=>a.key_taken===k.num && 
+            !a.items_returned.find(i => i.type === 'key' && i.id === k.id && i.returned));
+          let status = checkedOut ? 
+            (isOver12Hours(checkedOut.time_taken) ? 
+              `<span class="status-badge status-overdue">OVERDUE</span>` : 
+              `<span class="status-badge status-taken">TAKEN</span>`) : 
+            `<span class="status-badge status-available">AVAILABLE</span>`;
+          return `<tr>
+          <td>${k.num}</td><td>${k.room||''}</td><td>${k.category||''}</td><td>${k.floor||''}</td><td>${k.remarks||''}</td><td>${status}</td>
+          </tr>`;
+        }).join('')}
+        </tbody></table></div>
+      </div>`;
+  } else if(type === 'cards') {
+    content = `<div class="modal-title">Access Card Inventory</div>
+      <div class="modal-subtitle">All access cards in the system</div>
+      <div class="modal-grid">
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Total Cards</div>
+          <div class="modal-grid-value">${cards.length}</div>
+          <div class="modal-grid-footer">Electronic access cards</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Available</div>
+          <div class="modal-grid-value">${cards.filter(c => 
+            !accessHistory.some(a => a.access_card_taken === c.number && 
+            !a.items_returned.find(i => i.type === 'card' && i.id === c.id && i.returned))
+          ).length}</div>
+          <div class="modal-grid-footer">Ready for checkout</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Taken</div>
+          <div class="modal-grid-value">${cards.filter(c => 
+            accessHistory.some(a => a.access_card_taken === c.number && 
+            !a.items_returned.find(i => i.type === 'card' && i.id === c.id && i.returned))
+          ).length}</div>
+          <div class="modal-grid-footer">Currently checked out</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Overdue</div>
+          <div class="modal-grid-value">${cards.filter(c => {
+            const log = accessHistory.find(a => 
+              a.access_card_taken === c.number && 
+              !a.items_returned.find(i => i.type === 'card' && i.id === c.id && i.returned) &&
+              isOver12Hours(a.time_taken)
+            );
+            return !!log;
+          }).length}</div>
+          <div class="modal-grid-footer">Not returned on time</div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <input class="border rounded px-2 py-1 mb-2 w-full" placeholder="Search cards..." oninput="filterTable('modalCardTable', this.value)">
+        <div class="modal-table-container"><table class="w-full text-xs compact-table">
+        <thead><tr class="table-head">
+          <th>Number</th><th>Type</th><th>Description</th><th>Status</th>
+        </tr></thead>
+        <tbody id="modalCardTable">
+        ${cards.map(c=>{
+          let checkedOut = accessHistory.find(a=>a.access_card_taken===c.number && 
+            !a.items_returned.find(i => i.type === 'card' && i.id === c.id && i.returned));
+          let status = checkedOut ? 
+            (isOver12Hours(checkedOut.time_taken) ? 
+              `<span class="status-badge status-overdue">OVERDUE</span>` : 
+              `<span class="status-badge status-taken">TAKEN</span>`) : 
+            `<span class="status-badge status-available">AVAILABLE</span>`;
+          return `<tr>
+          <td>${c.number}</td><td>${c.category||''}</td><td>${c.desc||'N/A'}</td><td>${status}</td>
+          </tr>`;
+        }).join('')}
+        </tbody></table></div>
+      </div>`;
+  } else if(type === 'logs') {
+    content = `<div class="modal-title">Activity Logs</div>
+      <div class="modal-subtitle">All key and card access activities</div>
+      <div class="modal-grid">
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Total Logs</div>
+          <div class="modal-grid-value">${logs.length}</div>
+          <div class="modal-grid-footer">All tracked activities</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Check Outs</div>
+          <div class="modal-grid-value">${logs.filter(l => l.type === 'checkout').length}</div>
+          <div class="modal-grid-footer">Items checked out</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Check Ins</div>
+          <div class="modal-grid-value">${logs.filter(l => l.type === 'checkin').length}</div>
+          <div class="modal-grid-footer">Items returned</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Today</div>
+          <div class="modal-grid-value">${logs.filter(l => new Date(l.time).toDateString() === new Date().toDateString()).length}</div>
+          <div class="modal-grid-footer">Activities today</div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <input class="border rounded px-2 py-1 mb-2 w-full" placeholder="Search logs..." oninput="filterTable('modalLogTable', this.value)">
+        <div class="modal-table-container"><table class="w-full text-xs compact-table">
+        <thead><tr class="table-head">
+          <th>Employee #</th><th>Name</th><th>Phone</th>
+          <th>Key Taken</th><th>Card Taken</th>
+          <th>Activity</th>
+          <th>Time</th>
+          <th>Issued By</th>
+        </tr></thead>
+        <tbody id="modalLogTable">
+        ${logs.map(l=>{
+          return `<tr>
+            <td>${l.employee_id||''}</td>
+            <td>${l.name||''}</td>
+            <td>${l.phone||''}</td>
+            <td>${l.key_taken||''}</td>
+            <td>${l.access_card_taken||''}</td>
+            <td>${l.type === 'checkout' ? 'Check In' : 'Check Out'}</td>
+            <td>${new Date(l.time).toLocaleString()}</td>
+            <td>${l.issued_by||''}</td>
+          </tr>`;
+        }).reverse().join('')}
+        </tbody></table></div>
+      </div>`;
+  } else if(type === 'taken') {
+    // Collect all currently taken items (both keys and cards)
+    let takenItems = [];
+    
+    accessHistory.forEach(record => {
+      if (!record.items_returned.every(item => item.returned)) {
+        record.items_returned.forEach(item => {
+          if (!item.returned) {
+            takenItems.push({
+              recordId: record.id,
+              itemType: item.type,
+              itemId: item.id,
+              employeeId: record.employee_id,
+              employeeName: record.name,
+              department: record.department,
+              timeTaken: record.time_taken,
+              overdue: isOver12Hours(record.time_taken),
+              description: item.type === 'key' 
+                ? (keys.find(k => k.id === item.id)?.room || '') 
+                : (cards.find(c => c.id === item.id)?.number || '')
+            });
+          }
+        });
+      }
+    });
+    
+    content = `<div class="modal-title">Currently Taken Items</div>
+      <div class="modal-subtitle">Items that need to be returned</div>
+      <div class="modal-grid">
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Total Items Out</div>
+          <div class="modal-grid-value">${takenItems.length}</div>
+          <div class="modal-grid-footer">Pending return</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Keys</div>
+          <div class="modal-grid-value">${takenItems.filter(i => i.itemType === 'key').length}</div>
+          <div class="modal-grid-footer">Physical keys out</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Cards</div>
+          <div class="modal-grid-value">${takenItems.filter(i => i.itemType === 'card').length}</div>
+          <div class="modal-grid-footer">Access cards out</div>
+        </div>
+        <div class="modal-grid-item">
+          <div class="modal-grid-title">Overdue</div>
+          <div class="modal-grid-value">${takenItems.filter(i => i.overdue).length}</div>
+          <div class="modal-grid-footer">Past due date</div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <input class="border rounded px-2 py-1 mb-2 w-full" placeholder="Search taken items..." oninput="filterTakenItems(this.value)">
+        <div class="modal-table-container">
+          <table class="w-full text-xs compact-table">
+            <thead>
+              <tr class="table-head">
+                <th>Item Type</th>
+                <th>Item ID</th>
+                <th>Description</th>
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Time Taken</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="modalTakenTable">
+              ${takenItems.map(item => {
+                return `<tr>
+                  <td>
+                    <span class="item-badge ${item.itemType === 'key' ? 'item-badge-key' : 'item-badge-card'}">
+                      ${item.itemType === 'key' ? 'Key' : 'Card'}
+                    </span>
+                  </td>
+                  <td>${item.itemId}</td>
+                  <td>${item.description || ''}</td>
+                  <td>${item.employeeName} (${item.employeeId})</td>
+                  <td>${item.department || ''}</td>
+                  <td>${item.timeTaken}</td>
+                  <td>${item.overdue ? '<span class="status-badge status-overdue">OVERDUE</span>' : '<span class="status-badge status-taken">TAKEN</span>'}</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  }
+  document.getElementById('modalContent').innerHTML = content;
+  modal.classList.remove('hide');
+}
+function hideModal() {document.getElementById('modal').classList.add('hide');}
+function filterTable(tbodyId, val) {
+  val = val.toLowerCase();
+  let trs = document.getElementById(tbodyId).querySelectorAll('tr');
+  trs.forEach(tr=>{
+    if(tr.textContent.toLowerCase().includes(val)) tr.style.display='';
+    else tr.style.display='none';
+  });
+}
+
+// --- 12 Hours Highlight ---
+function isOver12Hours(time_taken) {
+  if (!time_taken) return false;
+  let taken = new Date(time_taken);
+  let diff = (Date.now() - taken.getTime()) / (1000*60*60);
+  return diff >= 12;
+}
+
+// --- Check-out Autofill ---
+function autofillCheckout(empId) {
+  let existing = employees.find(emp => emp.id === empId.trim());
+  if(existing) {
+    document.getElementById('checkoutName').value = existing.name || '';
+    document.getElementById('checkoutPhone').value = existing.phone || '';
+    document.getElementById('checkoutDept').value = existing.department || '';
+    document.getElementById('checkoutPosition').value = existing.position || '';
+  } else {
+    document.getElementById('checkoutName').value = '';
+    document.getElementById('checkoutPhone').value = '';
+    document.getElementById('checkoutDept').value = '';
+    document.getElementById('checkoutPosition').value = '';
+  }
+}
+
+// --- New Search Functionality ---
+function searchItems(type) {
+  const searchTerm = document.getElementById(`${type}Search`).value.toLowerCase();
+  const resultsContainer = document.getElementById(`${type}Results`);
+  resultsContainer.innerHTML = '';
+  
+  if (!searchTerm) {
+    resultsContainer.style.display = 'none';
+    return;
+  }
+  
+  let items = type === 'key' ? keys : cards;
+  let filteredItems = items.filter(item => {
+    const itemText = type === 'key' 
+      ? `${item.num} ${item.room || ''} ${item.floor || ''} ${item.category || ''} ${item.remarks || ''}`.toLowerCase()
+      : `${item.number} ${item.category || ''} ${item.desc || ''}`.toLowerCase();
+    return itemText.includes(searchTerm);
+  });
+  
+  if (filteredItems.length === 0) {
+    resultsContainer.innerHTML = '<div class="search-result-item">No items found</div>';
+  } else {
+    filteredItems.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'search-result-item';
+      div.innerHTML = type === 'key' 
+        ? `<div>
+            <strong>${item.num}</strong> - ${item.room || ''} 
+            <div class="item-category">${item.category || ''} | Floor: ${item.floor || ''}</div>
+          </div>`
+        : `<div>
+            <strong>${item.number}</strong> - ${item.category || ''} 
+            <div class="item-category">${item.desc || ''}</div>
+          </div>`;
+      div.onclick = () => {
+        addItemToCheckout(type, item);
+        resultsContainer.style.display = 'none';
+        document.getElementById(`${type}Search`).value = '';
+      };
+      resultsContainer.appendChild(div);
+    });
+  }
+  
+  resultsContainer.style.display = 'block';
+}
+
+// Filter key search results by entries
+function filterKeySearchResults() {
+  const entries = parseInt(document.getElementById('keyEntriesFilter').value, 10);
+  const resultsContainer = document.getElementById('keyResults');
+  const items = resultsContainer.querySelectorAll('.search-result-item');
+  
+  // Show all if "All" is selected
+  if (entries === 0) {
+    items.forEach(item => item.style.display = '');
+    return;
+  }
+  
+  // Show only the specified number of entries
+  items.forEach((item, index) => {
+    if (index < entries) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+// Filter card search results by entries
+function filterCardSearchResults() {
+  const entries = parseInt(document.getElementById('cardEntriesFilter').value, 10);
+  const resultsContainer = document.getElementById('cardResults');
+  const items = resultsContainer.querySelectorAll('.search-result-item');
+  
+  // Show all if "All" is selected
+  if (entries === 0) {
+    items.forEach(item => item.style.display = '');
+    return;
+  }
+  
+  // Show only the specified number of entries
+  items.forEach((item, index) => {
+    if (index < entries) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+// --- Add Item to Checkout ---
+function addItemToCheckout(type, item) {
+  const selectedItemsContainer = document.getElementById('selectedItemsList');
+  
+  // Create container for selected items if it doesn't exist
+  if (selectedItemsContainer.innerHTML.includes('No items selected yet')) {
+    selectedItemsContainer.innerHTML = '';
+  }
+  
+  // Check if item is already selected
+  const existingItem = Array.from(selectedItemsContainer.children).find(el => 
+    el.dataset.itemId === item.id && el.dataset.itemType === type
+  );
+  
+  if (existingItem) {
+    const quantityEl = existingItem.querySelector('.item-quantity');
+    const currentQuantity = parseInt(quantityEl.textContent);
+    quantityEl.textContent = currentQuantity + 1;
+    return;
+  }
+  
+  const itemElement = document.createElement('div');
+  itemElement.className = `selected-item ${type === 'key' ? 'key-item' : 'card-item'}`;
+  itemElement.dataset.itemType = type;
+  itemElement.dataset.itemId = item.id;
+  
+  const itemDetails = type === 'key' 
+    ? `<div>
+        <div><strong><i class="fa-solid fa-key key-icon mr-2"></i>Key:</strong> ${item.num} - ${item.room}</div>
+        <div class="item-category">${item.category || ''} | Floor: ${item.floor || ''}</div>
+      </div>`
+    : `<div>
+        <div><strong><i class="fa-solid fa-id-card card-icon mr-2"></i>Card:</strong> ${item.number} - ${item.category}</div>
+        <div class="item-category">${item.desc || ''}</div>
+      </div>`;
+  
+  itemElement.innerHTML = `
+    ${itemDetails}
+    <div class="item-quantity-section">
+      <div class="quantity-control">
+        <div class="quantity-btn" onclick="adjustSelectedItemQuantity('${type}', '${item.id}', -1)">-</div>
+        <span class="item-quantity">1</span>
+        <div class="quantity-btn" onclick="adjustSelectedItemQuantity('${type}', '${item.id}', 1)">+</div>
+      </div>
+      <button class="rw-btn text-xs px-2 py-1 rounded" onclick="removeSelectedItem('${type}', '${item.id}')" aria-label="Remove item">Remove</button>
+    </div>
+  `;
+  
+  selectedItemsContainer.appendChild(itemElement);
+}
+
+function adjustSelectedItemQuantity(type, id, change) {
+  const itemElement = document.querySelector(`.selected-item[data-item-type="${type}"][data-item-id="${id}"]`);
+  if (!itemElement) return;
+  
+  const quantityEl = itemElement.querySelector('.item-quantity');
+  let quantity = parseInt(quantityEl.textContent);
+  quantity += change;
+  
+  if (quantity < 1) {
+    removeSelectedItem(type, id);
+    return;
+  }
+  
+  quantityEl.textContent = quantity;
+}
+
+function removeSelectedItem(type, id) {
+  const itemElement = document.querySelector(`.selected-item[data-item-type="${type}"][data-item-id="${id}"]`);
+  if (itemElement) {
+    itemElement.remove();
+    
+    // If no items left, show message
+    const selectedItemsContainer = document.getElementById('selectedItemsList');
+    if (selectedItemsContainer.children.length === 0) {
+      selectedItemsContainer.innerHTML = '<p class="text-center text-gray-500">No items selected yet</p>';
+    }
+  }
+}
+
+function clearSelectedItems() {
+  const selectedItemsContainer = document.getElementById('selectedItemsList');
+  selectedItemsContainer.innerHTML = '<p class="text-center text-gray-500">No items selected yet</p>';
+}
+
+// --- Handle Checkout ---
+function handleCheckOut(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    id: 'LOG' + Date.now().toString().slice(-6),
+    employee_id: form.checkoutEmpId.value.trim(),
+    name: form.checkoutName.value.trim(),
+    phone: form.checkoutPhone.value.trim(),
+    department: form.checkoutDept.value.trim(),
+    position: form.checkoutPosition.value.trim(),
+    issued_by: form.checkoutIssuedBy.value.trim(),
+    time_taken: new Date().toLocaleString(),
+    items_returned: [],
+    status: 'Taken'
+  };
+  
+  // Validation
+  if (!/^[A-Za-z0-9]{3,10}$/.test(data.employee_id)) {
+    showToast('Employee ID must be 3-10 alphanumeric characters');
+    return false;
+  }
+  
+  // Get selected items
+  const selectedItems = document.querySelectorAll('#selectedItemsList .selected-item');
+  if (selectedItems.length === 0) {
+    showToast('Please add at least one item to checkout');
+    return false;
+  }
+  
+  // Process items
+  selectedItems.forEach(item => {
+    const type = item.dataset.itemType;
+    const id = item.dataset.itemId;
+    const quantity = parseInt(item.querySelector('.item-quantity').textContent);
+    
+    for (let i = 0; i < quantity; i++) {
+      data.items_returned.push({
+        type: type,
+        id: id,
+        returned: false
+      });
+    }
+    
+    // Set key and card information for the record
+    if (type === 'key') {
+      const key = keys.find(k => k.id === id);
+      if (key) {
+        data.key_taken = key.num;
+        data.key_id = key.id;
+        data.key_quantity = quantity;
+      }
+    } else {
+      const card = cards.find(c => c.id === id);
+      if (card) {
+        data.access_card_taken = card.number;
+        data.card_id = card.id;
+        data.card_quantity = quantity;
+      }
+    }
+  });
+  
+  // Add to access history
+  accessHistory.push(data);
+  
+  // Add to logs
+  logs.push({ 
+    type: 'checkout',
+    time: new Date().toISOString(),
+    employee_id: data.employee_id,
+    name: data.name,
+    phone: data.phone,
+    key_taken: data.key_taken || '',
+    access_card_taken: data.access_card_taken || '',
+    issued_by: data.issued_by,
+    time_taken: data.time_taken
+  });
+  
+  // Add employee if not exists
+  let existing = employees.find(emp => emp.id === data.employee_id);
+  if(!existing) {
+    employees.push({ 
+      id: data.employee_id, 
+      name: data.name, 
+      department: data.department, 
+      position: data.position || 'Not specified', 
+      phone: data.phone 
+    });
+    employeeMap.set(data.employee_id, employees[employees.length-1]);
+    localStorage.setItem('employees', JSON.stringify(employees));
+    showToast(`New employee ${data.name} added to the system`);
+  }
+  
+  // Save data
+  localStorage.setItem('logs', JSON.stringify(logs));
+  localStorage.setItem('accessHistory', JSON.stringify(accessHistory));
+  
+  // Reset form
+  form.reset();
+  document.getElementById('selectedItemsList').innerHTML = '<p class="text-center text-gray-500">No items selected yet</p>';
+  document.getElementById('checkoutTime').value = new Date().toLocaleString();
+  
+  showToast('Check-out recorded successfully!');
+  
+  // Immediately update the dashboard
+  renderDashboard();
+  
+  // Update checkin page
+  if (document.querySelector('[data-page="checkin"].sidebar-active')) {
+    renderCheckinTable();
+  } else {
+    // Add a visual indicator that new items are available
+    const checkinButton = document.querySelector('[data-page="checkin"]');
+    if (!checkinButton.querySelector('.notification-badge')) {
+      const badge = document.createElement('span');
+      badge.className = 'notification-badge';
+      badge.textContent = '!';
+      checkinButton.appendChild(badge);
+      setTimeout(() => {
+        if (badge.parentNode) badge.parentNode.removeChild(badge);
+      }, 5000);
+    }
+  }
+  
+  return false;
+}
+
+// --- NEW CHECK IN PAGE FUNCTIONALITY ---
+function renderCheckinTable() {
+  const tbody = document.getElementById('checkinTable');
+  tbody.innerHTML = '';
+  
+  // Filter records that have at least one item not returned
+  const nonReturnedRecords = accessHistory.filter(record => 
+    !record.items_returned.every(item => item.returned)
+  );
+  
+  if (nonReturnedRecords.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7">No items currently checked out</td></tr>';
+    return;
+  }
+  
+  // Apply search filter
+  const searchTerm = document.getElementById('checkinSearch')?.value.toLowerCase() || '';
+  const filteredRecords = nonReturnedRecords.filter(record => {
+    if (!searchTerm) return true;
+    return (
+      record.employee_id.toLowerCase().includes(searchTerm) ||
+      record.name.toLowerCase().includes(searchTerm) ||
+      record.phone.toLowerCase().includes(searchTerm) ||
+      (record.key_taken && record.key_taken.toLowerCase().includes(searchTerm)) ||
+      (record.access_card_taken && record.access_card_taken.toLowerCase().includes(searchTerm))
+    );
+  });
+  
+  // Render table
+  filteredRecords.forEach(record => {
+    const tr = document.createElement('tr');
+    const pendingItems = record.items_returned.filter(item => !item.returned).length;
+    const totalItems = record.items_returned.length;
+    const status = pendingItems === totalItems 
+      ? '<span class="status-badge status-taken">TAKEN</span>' 
+      : `<span class="status-badge status-partial">PARTIAL RETURN</span>`;
+    
+    // Add highlight class if the record is new
+    const isNewRecord = !record.hasBeenDisplayed;
+    if (isNewRecord) {
+      tr.classList.add('new-item-highlight');
+      record.hasBeenDisplayed = true;
+      localStorage.setItem('accessHistory', JSON.stringify(accessHistory));
+    }
+    
+    tr.innerHTML = `
+      <td>${record.id}</td>
+      <td>${record.name} (${record.employee_id})</td>
+      <td>${record.phone}</td>
+      <td>${pendingItems} of ${totalItems} items pending</td>
+      <td>${record.time_taken}</td>
+      <td>${status}</td>
+      <td><button class="rw-btn px-2 py-1 rounded text-xs" onclick="showCheckinModal('${record.id}')">Return Items</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterCheckinTable() {
+  renderCheckinTable();
+}
+
+// --- Check In Modal ---
+function showCheckinModal(recordId) {
+  const record = accessHistory.find(r => r.id === recordId);
+  if (!record) return;
+  
+  // Get pending items
+  const pendingItems = record.items_returned.filter(item => !item.returned);
+  
+  // Build HTML for the modal
+  let content = `
+    <div class="modal-title">Return Items</div>
+    <div class="modal-subtitle">For Record ID: ${record.id}</div>
+    
+    <div class="employee-detail-card">
+      <div class="employee-detail-title">
+        <i class="fa-solid fa-user"></i> Employee Details
+      </div>
+      <div class="employee-detail-row">
+        <div class="employee-detail-label">Employee ID:</div>
+        <div class="employee-detail-value">${record.employee_id}</div>
+      </div>
+      <div class="employee-detail-row">
+        <div class="employee-detail-label">Name:</div>
+        <div class="employee-detail-value">${record.name}</div>
+      </div>
+      <div class="employee-detail-row">
+        <div class="employee-detail-label">Phone:</div>
+        <div class="employee-detail-value">${record.phone}</div>
+      </div>
+      <div class="employee-detail-row">
+        <div class="employee-detail-label">Department:</div>
+        <div class="employee-detail-value">${record.department}</div>
+      </div>
+      <div class="employee-detail-row">
+        <div class="employee-detail-label">Position:</div>
+        <div class="employee-detail-value">${record.position || 'N/A'}</div>
+      </div>
+    </div>
+    
+    <div class="return-section">
+      <h3 class="return-section-title"><i class="fa-solid fa-user-check"></i> Issuer Information</h3>
+      
+      <div class="same-person-container">
+        <input type="checkbox" id="samePersonCheckbox" checked onchange="toggleSamePerson(this.checked, '${recordId}')">
+        <label for="samePersonCheckbox" class="ml-2 font-semibold">Same person returning the items</label>
+      </div>
+      
+      <div id="returnedByFields">
+        <!-- Fields will be dynamically shown when same person is unchecked -->
+      </div>
+      
+      <div class="form-group">
+        <label for="receivedBy" class="required">Received By</label>
+        <input type="text" id="receivedBy" class="form-input" placeholder="Name of the receiver" required>
+      </div>
+    </div>
+    
+    <div class="return-section">
+      <h3 class="return-section-title"><i class="fa-solid fa-list-check mr-2"></i> Items to Return</h3>
+      <div class="returned-items-list">
+        ${pendingItems.map(item => {
+          let itemDetails = '';
+          let icon = '';
+          if (item.type === 'key') {
+            const key = keys.find(k => k.id === item.id);
+            itemDetails = key ? `Key: ${key.num} - ${key.room}` : `Key: ${item.id}`;
+            icon = '<i class="fa-solid fa-key key-icon mr-2"></i>';
+          } else {
+            const card = cards.find(c => c.id === item.id);
+            itemDetails = card ? `Card: ${card.number} - ${card.category}` : `Card: ${item.id}`;
+            icon = '<i class="fa-solid fa-id-card card-icon mr-2"></i>';
+          }
+          return `
+            <div class="return-item item-pending" id="return_item_${item.type}_${item.id}">
+              <div class="return-item-info">
+                ${icon}${itemDetails}
+              </div>
+              <div class="return-item-status">
+                <input type="checkbox" id="return_${item.type}_${item.id}" class="return-item-checkbox" onchange="toggleReturnItem('${item.type}', '${item.id}', this.checked)">
+                <label for="return_${item.type}_${item.id}">Returned</label>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+    
+    <div class="return-section">
+      <div class="form-group">
+        <label for="returnRemarks">Remarks</label>
+        <textarea id="returnRemarks" class="form-input" placeholder="Any remarks"></textarea>
+      </div>
+      <button type="button" class="rw-btn checkin-btn w-full py-2 rounded-lg" onclick="handleCheckinSubmit('${recordId}')">
+        <i class="fa-solid fa-arrow-left mr-2"></i> Record Return
+      </button>
+    </div>
+  `;
+
+  document.getElementById('modalContent').innerHTML = content;
+  document.getElementById('modal').classList.remove('hide');
+  
+  // Initialize same person state
+  toggleSamePerson(true, recordId);
+}
+
+function toggleSamePerson(isSame, recordId) {
+  const record = accessHistory.find(r => r.id === recordId);
+  const returnedByFields = document.getElementById('returnedByFields');
+  
+  if (isSame) {
+    returnedByFields.innerHTML = '';
+    document.getElementById('returnedByName')?.remove();
+    document.getElementById('returnedByPhone')?.remove();
+    document.getElementById('returnedByDept')?.remove();
+    document.getElementById('returnedByPosition')?.remove();
+  } else {
+    returnedByFields.innerHTML = `
+      <div class="checkin-form-grid">
+        <div class="form-group">
+          <label for="returnedByEmpId">Returned By Employee ID</label>
+          <input type="text" id="returnedByEmpId" class="form-input" placeholder="Enter employee ID" oninput="autofillReturnedBy(this.value)">
+        </div>
+        <div class="form-group">
+          <label for="returnedByName" class="required">Returned By Name</label>
+          <input type="text" id="returnedByName" class="form-input" placeholder="Name of the person returning" required>
+        </div>
+        <div class="form-group">
+          <label for="returnedByPhone">Phone Number</label>
+          <input type="tel" id="returnedByPhone" class="form-input" placeholder="Enter phone number">
+        </div>
+        <div class="form-group">
+          <label for="returnedByDept">Department</label>
+          <input type="text" id="returnedByDept" class="form-input" placeholder="Enter department">
+        </div>
+        <div class="form-group">
+          <label for="returnedByPosition">Position</label>
+          <input type="text" id="returnedByPosition" class="form-input" placeholder="Enter position">
+        </div>
+      </div>
+    `;
+  }
+}
+
+function toggleReturnItem(type, id, isReturned) {
+  const itemElement = document.getElementById(`return_item_${type}_${id}`);
+  if (isReturned) {
+    itemElement.classList.remove('item-pending');
+    itemElement.classList.add('item-returned');
+  } else {
+    itemElement.classList.remove('item-returned');
+    itemElement.classList.add('item-pending');
+  }
+}
+
+function autofillReturnedBy(empId) {
+  const returnedByEmpId = document.getElementById('returnedByEmpId');
+  const returnedByName = document.getElementById('returnedByName');
+  const returnedByPhone = document.getElementById('returnedByPhone');
+  const returnedByDept = document.getElementById('returnedByDept');
+  const returnedByPosition = document.getElementById('returnedByPosition');
+  
+  let existing = employees.find(emp => emp.id === empId.trim());
+  if (existing) {
+    if (returnedByName) returnedByName.value = existing.name || '';
+    if (returnedByPhone) returnedByPhone.value = existing.phone || '';
+    if (returnedByDept) returnedByDept.value = existing.department || '';
+    if (returnedByPosition) returnedByPosition.value = existing.position || '';
+  } else {
+    if (returnedByName) returnedByName.value = '';
+    if (returnedByPhone) returnedByPhone.value = '';
+    if (returnedByDept) returnedByDept.value = '';
+    if (returnedByPosition) returnedByPosition.value = '';
+  }
+}
+
+function handleCheckinSubmit(recordId) {
+  const record = accessHistory.find(r => r.id === recordId);
+  if (!record) return false;
+
+  const samePerson = document.getElementById('samePersonCheckbox').checked;
+  const returnedByEmpId = samePerson ? record.employee_id : document.getElementById('returnedByEmpId')?.value || '';
+  const returnedByName = samePerson ? record.name : document.getElementById('returnedByName')?.value || '';
+  const returnedByPhone = samePerson ? record.phone : document.getElementById('returnedByPhone')?.value || '';
+  const returnedByDept = samePerson ? record.department : document.getElementById('returnedByDept')?.value || '';
+  const returnedByPosition = samePerson ? record.position : document.getElementById('returnedByPosition')?.value || '';
+  const receivedBy = document.getElementById('receivedBy').value.trim();
+  const remarks = document.getElementById('returnRemarks').value.trim();
+
+  // Get all checked items
+  const checkboxes = document.querySelectorAll('.return-item-checkbox:checked');
+  const returnedItems = [];
+  checkboxes.forEach(checkbox => {
+    const id = checkbox.id.replace('return_key_', '').replace('return_card_', '');
+    const type = checkbox.id.includes('return_key_') ? 'key' : 'card';
+    returnedItems.push({ type, id });
+  });
+
+  if (returnedItems.length === 0) {
+    showToast('Please select at least one item to return');
+    return false;
+  }
+
+  // Update the record: mark these items as returned
+  returnedItems.forEach(returnedItem => {
+    const item = record.items_returned.find(item => 
+      item.type === returnedItem.type && item.id === returnedItem.id
+    );
+    if (item) {
+      item.returned = true;
+    }
+  });
+
+  // Update the record's return information
+  record.returned_by = returnedByName;
+  record.returned_emp_id = returnedByEmpId;
+  record.returned_phone = returnedByPhone;
+  record.returned_dept = returnedByDept;
+  record.returned_position = returnedByPosition;
+  record.receiver = receivedBy;
+  record.remarks = remarks;
+  
+  // If all items are now returned, set the time_brought
+  const allReturned = record.items_returned.every(item => item.returned);
+  if (allReturned) {
+    record.time_brought = new Date().toLocaleString();
+    record.status = 'Returned';
+  } else {
+    record.status = 'Partially Returned';
+  }
+
+  // Add to logs
+  logs.push({ 
+    type: 'checkin',
+    time: new Date().toISOString(),
+    record_id: recordId,
+    returned_items: returnedItems,
+    returned_by: returnedByName,
+    returned_emp_id: returnedByEmpId,
+    returned_phone: returnedByPhone,
+    returned_dept: returnedByDept,
+    returned_position: returnedByPosition,
+    received_by: receivedBy,
+    remarks: remarks,
+    employee_id: record.employee_id,
+    name: record.name
+  });
+
+  // Save to localStorage
+  localStorage.setItem('accessHistory', JSON.stringify(accessHistory));
+  localStorage.setItem('logs', JSON.stringify(logs));
+
+  // Add employee if not exists
+  if (!samePerson && returnedByEmpId) {
+    let existing = employees.find(emp => emp.id === returnedByEmpId);
+    if(!existing) {
+      employees.push({ 
+        id: returnedByEmpId, 
+        name: returnedByName, 
+        department: returnedByDept || 'Not specified', 
+        position: returnedByPosition || 'Not specified', 
+        phone: returnedByPhone || '' 
+      });
+      employeeMap.set(returnedByEmpId, employees[employees.length-1]);
+      localStorage.setItem('employees', JSON.stringify(employees));
+      showToast(`New employee ${returnedByName} added to the system`);
+    }
+  }
+
+  showToast('Return recorded successfully!');
+  hideModal();
+
+  // Refresh views
+  renderDashboard();
+  renderCheckinTable();
+  return false;
+}
+
+// --- REPORT TABLE WITH PAGINATION ---
+let reportCurrentPage = 1;
+function renderReport() {
+  let from = document.getElementById('reportFrom')?.value;
+  let to = document.getElementById('reportTo')?.value;
+  let tbody = document.getElementById('reportTable');
+  let subheading = document.getElementById('reportSubheading');
+  let entriesPerPage = parseInt(document.getElementById('entriesPerPage').value, 10) || 10;
+  tbody.innerHTML = '';
+  let filtered = accessHistory.filter(h => {
+    let t = h.time_taken ? new Date(h.time_taken) : null;
+    if(from && t && t < new Date(from)) return false;
+    if(to && t && t > new Date(to+"T23:59:59")) return false;
+    return true;
+  });
+  subheading.textContent = `(${from?from:'Start'} to ${to?to:'Today'})`;
+  // Pagination
+  let totalPages = Math.ceil(filtered.length/entriesPerPage);
+  if(reportCurrentPage > totalPages) reportCurrentPage = totalPages || 1;
+  let startIdx = (reportCurrentPage-1)*entriesPerPage;
+  let pageData = filtered.slice(startIdx, startIdx+entriesPerPage);
+  pageData.forEach(h => {
+    const allReturned = h.items_returned.every(item => item.returned);
+    const anyPending = h.items_returned.some(item => !item.returned);
+    
+    let status = allReturned 
+      ? '<span class="status-badge status-available">RETURNED</span>' 
+      : anyPending 
+        ? (isOver12Hours(h.time_taken) 
+          ? '<span class="status-badge status-overdue">OVERDUE</span>' 
+          : '<span class="status-badge status-taken">TAKEN</span>')
+        : '';
+    
+    let tr = document.createElement('tr');
+    if (!allReturned && isOver12Hours(h.time_taken)) tr.classList.add('unreturned');
+    
+    tr.innerHTML = `
+      <td>${h.key_taken ? `${h.key_taken} (x${h.key_quantity})` : ''}</td>
+      <td>${keys.find(k => k.id === h.key_id)?.room || ''}</td>
+      <td>${h.name||''}</td>
+      <td>${h.issued_by||''}</td>
+      <td>${h.time_taken||''}</td>
+      <td>${status}</td>
+      <td>${h.returned_by||''}</td>
+      <td>${h.receiver||''}</td>
+      <td>${h.time_brought||''}</td>
+      <td>${h.remarks||''}</td>`;
+    tbody.appendChild(tr);
+  });
+  // Pagination controls
+  let pagination = document.getElementById("reportPagination");
+  if(totalPages>1) {
+    let phtml = '';
+    for(let i=1;i<=totalPages;i++) {
+      phtml += `<button class="rw-btn px-2 py-1 text-xs ${i===reportCurrentPage?'sidebar-active':''}" onclick="reportCurrentPage=${i};renderReport()">${i}</button>`;
+    }
+    pagination.innerHTML = phtml;
+  } else pagination.innerHTML = '';
+}
+
+// Clear report filters
+function clearReportFilters() {
+  document.getElementById('reportFrom').value = '';
+  document.getElementById('reportTo').value = '';
+  document.getElementById('entriesPerPage').value = '10';
+  reportCurrentPage = 1;
+  renderReport();
+}
+
+// --- PDF Report ---
+function downloadPDFReport() {
+  const { jsPDF } = window.jspdf;
+  let doc = new jsPDF();
+  doc.setFontSize(18);
+  doc.text("Rosewood Hotel", 105, 15, null, null, 'center');
+  doc.setFontSize(14);
+  doc.text("Security Access Report", 105, 25, null, null, 'center');
+  
+  let from = document.getElementById('reportFrom')?.value;
+  let to = document.getElementById('reportTo')?.value;
+  let range = `(${from?from:'Start'} to ${to?to:'Today'})`;
+  doc.setFontSize(12);
+  doc.text(range, 105, 32, null, null, 'center');
+  
+  let headers = [
+    "Key Number", 
+    "Room Description", 
+    "Issued To", 
+    "Issued By", 
+    "Time Taken", 
+    "Status", 
+    "Returned By", 
+    "Received By", 
+    "Time Brought", 
+    "Remarks"
+  ];
+  
+  let rows = [];
+  document.querySelectorAll("#reportTable tr").forEach(tr => {
+    let row = [];
+    tr.querySelectorAll('td').forEach(td => {
+      row.push(td.textContent);
+    });
+    rows.push(row);
+  });
+  
+  doc.autoTable({
+    head: [headers],
+    body: rows,
+    startY: 40,
+    styles: { 
+      fontSize: 8,
+      cellPadding: 1.5,
+      overflow: 'linebreak'
+    },
+    headStyles: {
+      fillColor: [10, 20, 51],
+      textColor: 255,
+      fontStyle: 'bold'
+    },
+    alternateRowStyles: {
+      fillColor: [240, 240, 240]
+    }
+  });
+  
+  doc.save("security_access_report.pdf");
+}
+
+// --- Excel Report ---
+function downloadExcelReport() {
+  // Get the report table
+  const table = document.getElementById('reportTable');
+  
+  // Create a new workbook
+  const wb = XLSX.utils.book_new();
+  
+  // Extract data from the table
+  const data = [];
+  const rows = table.querySelectorAll('tr');
+  
+  // Add headers
+  const headers = [
+    "Key Number", 
+    "Room Description", 
+    "Issued To", 
+    "Issued By", 
+    "Time Taken", 
+    "Status", 
+    "Returned By", 
+    "Received By", 
+    "Time Brought", 
+    "Remarks"
+  ];
+  data.push(headers);
+  
+  // Add rows
+  rows.forEach(row => {
+    const rowData = [];
+    row.querySelectorAll('td').forEach(cell => {
+      rowData.push(cell.textContent);
+    });
+    data.push(rowData);
+  });
+  
+  // Create worksheet
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  
+  // Add worksheet to workbook
+  XLSX.utils.book_append_sheet(wb, ws, "Access Report");
+  
+  // Generate file and download
+  XLSX.writeFile(wb, "security_access_report.xlsx");
+}
+
+// --- Overdue PDF Report ---
+function downloadOverduePDFReport() {
+  const overdueItems = accessHistory.filter(a => 
+    !a.items_returned.every(item => item.returned) && 
+    isOver12Hours(a.time_taken)
+  );
+
+  if (overdueItems.length === 0) {
+    showToast('No overdue items to download');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  let doc = new jsPDF();
+  
+  // Report title
+  doc.setFontSize(18);
+  doc.text("Rosewood Hotel", 105, 15, null, null, 'center');
+  doc.setFontSize(16);
+  doc.text("Overdue Items Report", 105, 25, null, null, 'center');
+  
+  // Date range
+  const now = new Date();
+  const dateStr = now.toLocaleDateString();
+  doc.setFontSize(12);
+  doc.text(`Generated on: ${dateStr}`, 105, 35, null, null, 'center');
+  
+  // Table headers
+  const headers = [
+    "Employee", 
+    "ID", 
+    "Phone", 
+    "Item", 
+    "Time Taken", 
+    "Status"
+  ];
+  
+  // Prepare data
+  const rows = overdueItems.map(item => [
+    item.name||'',
+    item.employee_id||'',
+    item.phone||'',
+    `${item.key_taken ? 'Key: ' + item.key_taken : ''} ${item.access_card_taken ? 'Card: ' + item.access_card_taken : ''}`,
+    item.time_taken||'',
+    'OVERDUE'
+  ]);
+  
+  // Create table
+  doc.autoTable({
+    head: [headers],
+    body: rows,
+    startY: 45,
+    styles: { 
+      fontSize: 9,
+      cellPadding: 2
+    },
+    headStyles: {
+      fillColor: [251, 191, 36],
+      textColor: 0,
+      fontStyle: 'bold'
+    },
+    alternateRowStyles: {
+      fillColor: [255, 251, 235]
+    }
+  });
+  
+  // Save the PDF
+  doc.save("overdue_items_report.pdf");
+  showToast('Overdue items PDF downloaded');
+}
+
+// --- Employee Management ---
+let employeeCurrentPage = 1;
+let employeeEntriesPerPage = 10;
+let employeeSearchTerm = '';
+
+function addEmployee(e) {
+  e.preventDefault();
+  let id = document.getElementById('empId').value.trim();
+  let name = document.getElementById('empName').value.trim();
+  let department = document.getElementById('empDept').value.trim();
+  let position = document.getElementById('empPosition').value.trim();
+  let phone = document.getElementById('empPhone').value.trim();
+  
+  if (!/^[A-Za-z0-9]{3,10}$/.test(id)) {
+    showToast('Employee ID must be 3-10 alphanumeric characters');
+    return false;
+  }
+  
+  if(employees.find(emp => emp.id === id)) { showToast('Employee with this ID exists!'); return false;}
+  employees.push({ id, name, department, position, phone });
+  employeeMap.set(id, employees[employees.length-1]);
+  localStorage.setItem('employees', JSON.stringify(employees));
+  renderEmployeeTable();
+  e.target.reset();
+  document.getElementById('empPhotoPreview').src = "https://via.placeholder.com/100";
+  renderDashboard();
+  return false;
+}
+
+function renderEmployeeTable() {
+  let tbody = document.getElementById('employeeTable');
+  tbody.innerHTML = '';
+  
+  // Get pagination settings
+  employeeEntriesPerPage = parseInt(document.getElementById('employeeEntries').value) || 10;
+  
+  // Filter employees
+  let filteredEmployees = employees;
+  if (employeeSearchTerm) {
+    const searchLower = employeeSearchTerm.toLowerCase();
+    filteredEmployees = employees.filter(emp => 
+      emp.id.toLowerCase().includes(searchLower) ||
+      emp.name.toLowerCase().includes(searchLower) ||
+      (emp.department && emp.department.toLowerCase().includes(searchLower)) ||
+      (emp.position && emp.position.toLowerCase().includes(searchLower)) ||
+      (emp.phone && emp.phone.toLowerCase().includes(searchLower))
+    );
+  }
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredEmployees.length / employeeEntriesPerPage);
+  if (employeeCurrentPage > totalPages) employeeCurrentPage = totalPages || 1;
+  const startIdx = (employeeCurrentPage - 1) * employeeEntriesPerPage;
+  const pageData = filteredEmployees.slice(startIdx, startIdx + employeeEntriesPerPage);
+  
+  // Render table
+  pageData.forEach(emp => {
+    let tr = document.createElement('tr');
+    tr.innerHTML = `<td>${emp.id}</td>
+      <td>${emp.name}</td>
+      <td>${emp.phone||''}</td>
+      <td>${emp.department}</td>
+      <td>${emp.position||''}</td>
+      <td><button onclick="confirmDeletion(() => removeEmployee('${emp.id}'))" class="rw-btn text-xs px-2 py-1 rounded">Remove</button></td>`;
+    tbody.appendChild(tr);
+  });
+  
+  // Render pagination
+  const pagination = document.getElementById('employeePagination');
+  pagination.innerHTML = '';
+  
+  if (totalPages > 1) {
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement('button');
+      btn.className = `pagination-btn ${i === employeeCurrentPage ? 'active' : ''}`;
+      btn.textContent = i;
+      btn.onclick = () => {
+        employeeCurrentPage = i;
+        renderEmployeeTable();
+      };
+      pagination.appendChild(btn);
+    }
+  }
+}
+
+function filterEmployeeTable() {
+  employeeSearchTerm = document.getElementById('employeeSearch').value;
+  employeeCurrentPage = 1;
+  renderEmployeeTable();
+}
+
+function removeEmployee(id) {
+  employees = employees.filter(emp => emp.id !== id);
+  employeeMap.delete(id);
+  localStorage.setItem('employees', JSON.stringify(employees));
+  renderEmployeeTable();
+  renderDashboard();
+}
+
+function exportEmployees() {
+  const headers = ['id', 'name', 'department', 'position', 'phone'];
+  const csv = [headers.join(',')];
+  employees.forEach(emp => {
+    csv.push([emp.id, emp.name, emp.department, emp.position || '', emp.phone || ''].map(field => `"${field}"`).join(','));
+  });
+  const csvStr = csv.join('\n');
+  const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `employees_${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
+}
+
+function importEmployees(files) {
+  if (!files || files.length === 0) return;
+  const file = files[0];
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const rows = text.split('\n').slice(1); // skip header
+    const newEmployees = [];
+    rows.forEach(row => {
+      if (!row.trim()) return;
+      const cols = row.split(',').map(col => col.trim().replace(/^"|"$/g, ''));
+      if (cols.length < 3) return;
+      const [id, name, department, position, phone] = cols;
+      if (!id || !name || !department) return;
+      // Check if already exists
+      if (!employees.some(emp => emp.id === id)) {
+        newEmployees.push({ id, name, department, position, phone });
+      }
+    });
+    employees = [...employees, ...newEmployees];
+    newEmployees.forEach(emp => employeeMap.set(emp.id, emp));
+    localStorage.setItem('employees', JSON.stringify(employees));
+    renderEmployeeTable();
+    showToast(`Imported ${newEmployees.length} employees`);
+  };
+  reader.readAsText(file);
+}
+
+// --- Key Management ---
+let keyCurrentPage = 1;
+let keyEntriesPerPage = 10;
+let keySearchTerm = '';
+
+function addKey(e) {
+  e.preventDefault();
+  let num = document.getElementById('keyNum').value.trim();
+  let room = document.getElementById('keyRoomDesc').value.trim();
+  let floor = document.getElementById('keyFloor').value.trim();
+  let category = document.getElementById('keyCategory').value;
+  let remarks = document.getElementById('keyRemarks').value.trim();
+  if(keys.find(k=>k.num === num)) { showToast('Key exists!'); return false;}
+  keys.push({ id: 'KEY' + Date.now().toString().slice(-6), num, room, floor, category, remarks, status: 'Available' });
+  keyMap.set(keys[keys.length-1].id, keys[keys.length-1]);
+  localStorage.setItem('keys', JSON.stringify(keys));
+  renderKeyTable();
+  e.target.reset();
+  renderDashboard();
+  return false;
+}
+
+function renderKeyTable() {
+  let tbody = document.getElementById('keyTable');
+  tbody.innerHTML = '';
+  
+  // Get pagination settings
+  keyEntriesPerPage = parseInt(document.getElementById('keyEntries').value) || 10;
+  
+  // Filter keys
+  let filteredKeys = keys;
+  if (keySearchTerm) {
+    const searchLower = keySearchTerm.toLowerCase();
+    filteredKeys = keys.filter(key => 
+      key.num.toLowerCase().includes(searchLower) ||
+      (key.room && key.room.toLowerCase().includes(searchLower)) ||
+      (key.category && key.category.toLowerCase().includes(searchLower)) ||
+      (key.floor && key.floor.toLowerCase().includes(searchLower)) ||
+      (key.remarks && key.remarks.toLowerCase().includes(searchLower))
+    );
+  }
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredKeys.length / keyEntriesPerPage);
+  if (keyCurrentPage > totalPages) keyCurrentPage = totalPages || 1;
+  const startIdx = (keyCurrentPage - 1) * keyEntriesPerPage;
+  const pageData = filteredKeys.slice(startIdx, startIdx + keyEntriesPerPage);
+  
+  // Render table
+  pageData.forEach(k => {
+    let checkedOut = accessHistory.find(a=>a.key_taken===k.num && 
+      !a.items_returned.find(i => i.type === 'key' && i.id === k.id && i.returned));
+    let status = checkedOut ? 
+      (isOver12Hours(checkedOut.time_taken) ? 
+        `<span class="status-badge status-overdue">OVERDUE</span>` : 
+        `<span class="status-badge status-taken">TAKEN</span>`) : 
+      `<span class="status-badge status-available">AVAILABLE</span>`;
+    
+    let tr = document.createElement('tr');
+    tr.innerHTML = `<td>${k.num}</td>
+      <td>${k.floor}</td>
+      <td>${k.room}</td>
+      <td>${k.category || ''}</td>
+      <td>${status}</td>
+      <td><button onclick="confirmDeletion(() => removeKey('${k.id}'))" class="rw-btn text-xs px-2 py-1 rounded">Remove</button></td>`;
+    tbody.appendChild(tr);
+  });
+  
+  // Render pagination
+  const pagination = document.getElementById('keyPagination');
+  pagination.innerHTML = '';
+  
+  if (totalPages > 1) {
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement('button');
+      btn.className = `pagination-btn ${i === keyCurrentPage ? 'active' : ''}`;
+      btn.textContent = i;
+      btn.onclick = () => {
+        keyCurrentPage = i;
+        renderKeyTable();
+      };
+      pagination.appendChild(btn);
+    }
+  }
+}
+
+function filterKeyTable() {
+  keySearchTerm = document.getElementById('keySearch').value;
+  keyCurrentPage = 1;
+  renderKeyTable();
+}
+
+function removeKey(id) {
+  keys = keys.filter(k => k.id !== id);
+  keyMap.delete(id);
+  localStorage.setItem('keys', JSON.stringify(keys));
+  renderKeyTable();
+  renderDashboard();
+}
+
+function exportKeys() {
+  const headers = ['num', 'room', 'category', 'floor', 'remarks'];
+  const csv = [headers.join(',')];
+  keys.forEach(k => {
+    csv.push([k.num, k.room || '', k.category || '', k.floor || '', k.remarks || ''].map(field => `"${field}"`).join(','));
+  });
+  const csvStr = csv.join('\n');
+  const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `keys_${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
+}
+
+function importKeys(files) {
+  if (!files || files.length === 0) return;
+  const file = files[0];
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const rows = text.split('\n').slice(1); // skip header
+    const newKeys = [];
+    rows.forEach(row => {
+      if (!row.trim()) return;
+      const cols = row.split(',').map(col => col.trim().replace(/^"|"$/g, ''));
+      if (cols.length < 1) return;
+      const [num, room, category, floor, remarks] = cols;
+      if (!num) return;
+      // Check if already exists
+      if (!keys.some(k => k.num === num)) {
+        newKeys.push({ id: 'KEY' + Date.now().toString().slice(-6), num, room, category, floor, remarks, status: 'Available' });
+      }
+    });
+    keys = [...keys, ...newKeys];
+    newKeys.forEach(k => keyMap.set(k.id, k));
+    localStorage.setItem('keys', JSON.stringify(keys));
+    renderKeyTable();
+    showToast(`Imported ${newKeys.length} keys`);
+  };
+  reader.readAsText(file);
+}
+
+// --- Card Management ---
+let cardCurrentPage = 1;
+let cardEntriesPerPage = 10;
+let cardSearchTerm = '';
+
+function addCard(e) {
+  e.preventDefault();
+  let number = document.getElementById('cardNumber').value.trim();
+  let category = document.getElementById('cardCategory').value;
+  let desc = document.getElementById('cardDesc').value.trim();
+  if(cards.find(c=>c.number === number)) { showToast('Card exists!'); return false;}
+  cards.push({ id: 'CARD' + Date.now().toString().slice(-6), number, category, desc, status: 'Available' });
+  cardMap.set(cards[cards.length-1].id, cards[cards.length-1]);
+  localStorage.setItem('cards', JSON.stringify(cards));
+  renderCardTable();
+  e.target.reset();
+  renderDashboard();
+  return false;
+}
+
+function renderCardTable() {
+  let tbody = document.getElementById('cardTable');
+  tbody.innerHTML = '';
+  
+  // Get pagination settings
+  cardEntriesPerPage = parseInt(document.getElementById('cardEntries').value) || 10;
+  
+  // Filter cards
+  let filteredCards = cards;
+  if (cardSearchTerm) {
+    const searchLower = cardSearchTerm.toLowerCase();
+    filteredCards = cards.filter(card => 
+      card.number.toLowerCase().includes(searchLower) ||
+      (card.category && card.category.toLowerCase().includes(searchLower)) ||
+      (card.desc && card.desc.toLowerCase().includes(searchLower))
+    );
+  }
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredCards.length / cardEntriesPerPage);
+  if (cardCurrentPage > totalPages) cardCurrentPage = totalPages || 1;
+  const startIdx = (cardCurrentPage - 1) * cardEntriesPerPage;
+  const pageData = filteredCards.slice(startIdx, startIdx + cardEntriesPerPage);
+  
+  // Render table
+  pageData.forEach(c => {
+    let checkedOut = accessHistory.find(a=>a.access_card_taken===c.number && 
+      !a.items_returned.find(i => i.type === 'card' && i.id === c.id && i.returned));
+    let status = checkedOut ? 
+      (isOver12Hours(checkedOut.time_taken) ? 
+        `<span class="status-badge status-overdue">OVERDUE</span>` : 
+        `<span class="status-badge status-taken">TAKEN</span>`) : 
+      `<span class="status-badge status-available">AVAILABLE</span>`;
+    
+    let tr = document.createElement('tr');
+    tr.innerHTML = `<td>${c.number}</td>
+      <td>${c.category}</td>
+      <td>${c.desc||''}</td>
+      <td>${status}</td>
+      <td><button onclick="confirmDeletion(() => removeCard('${c.id}'))" class="rw-btn text-xs px-2 py-1 rounded">Remove</button></td>`;
+    tbody.appendChild(tr);
+  });
+  
+  // Render pagination
+  const pagination = document.getElementById('cardPagination');
+  pagination.innerHTML = '';
+  
+  if (totalPages > 1) {
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement('button');
+      btn.className = `pagination-btn ${i === cardCurrentPage ? 'active' : ''}`;
+      btn.textContent = i;
+      btn.onclick = () => {
+        cardCurrentPage = i;
+        renderCardTable();
+      };
+      pagination.appendChild(btn);
+    }
+  }
+}
+
+function filterCardTable() {
+  cardSearchTerm = document.getElementById('cardSearch').value;
+  cardCurrentPage = 1;
+  renderCardTable();
+}
+
+function removeCard(id) {
+  cards = cards.filter(c => c.id !== id);
+  cardMap.delete(id);
+  localStorage.setItem('cards', JSON.stringify(cards));
+  renderCardTable();
+  renderDashboard();
+}
+
+function exportCards() {
+  const headers = ['number', 'category', 'desc'];
+  const csv = [headers.join(',')];
+  cards.forEach(c => {
+    csv.push([c.number, c.category || '', c.desc || ''].map(field => `"${field}"`).join(','));
+  });
+  const csvStr = csv.join('\n');
+  const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `cards_${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
+}
+
+function importCards(files) {
+  if (!files || files.length === 0) return;
+  const file = files[0];
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const rows = text.split('\n').slice(1); // skip header
+    const newCards = [];
+    rows.forEach(row => {
+      if (!row.trim()) return;
+      const cols = row.split(',').map(col => col.trim().replace(/^"|"$/g, ''));
+      if (cols.length < 1) return;
+      const [number, category, desc] = cols;
+      if (!number) return;
+      // Check if already exists
+      if (!cards.some(c => c.number === number)) {
+        newCards.push({ id: 'CARD' + Date.now().toString().slice(-6), number, category, desc, status: 'Available' });
+      }
+    });
+    cards = [...cards, ...newCards];
+    newCards.forEach(c => cardMap.set(c.id, c));
+    localStorage.setItem('cards', JSON.stringify(cards));
+    renderCardTable();
+    showToast(`Imported ${newCards.length} cards`);
+  };
+  reader.readAsText(file);
+}
+
+// --- Password Protected Deletion ---
+function confirmDeletion(callback) {
+  const password = prompt('Enter password to delete:');
+  if (password === 'rwdha@2025') {
+    callback();
+  } else {
+    showToast('Incorrect password. Deletion aborted.');
+  }
+}
+
+// --- Check Out Section (form re-render) ---
+function renderCheckOutSection() {
+  // Autofill time
+  document.getElementById('checkoutTime').value = new Date().toLocaleString();
+  
+  // Clear any previous items
+  document.getElementById('selectedItemsList').innerHTML = '<p class="text-center text-gray-500">No items selected yet</p>';
+  
+  // Hide search results
+  document.getElementById('keyResults').style.display = 'none';
+  document.getElementById('cardResults').style.display = 'none';
+}
+
+// --- Photo Preview ---
+function previewEmpPhoto(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('empPhotoPreview').src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+window.onload = function() {
+  // Set default dates for report
+  let today = new Date();
+  let lastWeek = new Date();
+  lastWeek.setDate(today.getDate() - 7);
+  
+  document.getElementById('reportFrom').valueAsDate = lastWeek;
+  document.getElementById('reportTo').valueAsDate = today;
+  
+  // Set current time for checkout
+  document.getElementById('checkoutTime').value = new Date().toLocaleString();
+  
+  // Initialize data maps
+  initializeMaps();
+  
+  // Render initial views
+  renderDashboard();
+  renderEmployeeTable();
+  renderKeyTable();
+  renderCardTable();
+  renderCheckinTable();
+};
+</script>
+</body>
+</html>
